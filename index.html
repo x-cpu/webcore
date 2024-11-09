@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>x-cpu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* Dark Theme & Basic Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,6 +36,16 @@
             font-style: italic;
             color: white;
         }
+
+        /* Info Icon */
+        .info-icon {
+            position: fixed;
+            bottom: 10px;
+            left: 20px;
+            font-size: 1.2em; /* Adjust this value to change the icon size */
+            cursor: pointer;
+            color: cornflowerblue; /* Set the icon color to cornflower blue */
+        }
     </style>
 </head>
 <body>
@@ -48,6 +59,13 @@
     <!-- Footer Slogan -->
     <div class="slogan">
         "When I grow up, I want to be a robot"
+    </div>
+
+    <!-- Info Icon for Email -->
+    <div class="info-icon">
+        <a href="mailto:info@x-cpu.com" style="color: cornflowerblue; text-decoration: none;">
+            <i class="fas fa-envelope"></i>
+        </a>
     </div>
 
     <!-- Animation Script -->
@@ -99,6 +117,14 @@
         canvas.addEventListener('mousemove', (event) => {
             mouseX = event.clientX;
             mouseY = event.clientY;
+        });
+
+        // Support touch devices
+        canvas.addEventListener('touchmove', (event) => {
+            event.preventDefault(); // Prevent scrolling on touch devices
+            const touch = event.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
         });
 
         // Click event to reset the snake position
