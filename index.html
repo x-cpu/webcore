@@ -6,11 +6,8 @@
     <title>x-cpu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Dark Theme & Basic Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Courier, monospace; background-color: #121212; color: white; display: flex; min-height: 100vh; justify-content: center; align-items: center; position: relative; }
-
-        /* Top Left Site Name */
         .site-name {
             position: fixed;
             top: 10px;
@@ -19,15 +16,11 @@
             font-weight: bold;
             text-transform: lowercase;
         }
-
-        /* Canvas for Animation */
         #animationCanvas {
             width: 100%;
             height: 100%;
             background-color: #1a1a1a;
         }
-
-        /* Footer Slogan Position */
         .slogan {
             position: fixed;
             bottom: 10px;
@@ -36,54 +29,44 @@
             font-style: italic;
             color: white;
         }
-
-        /* Info Icon */
         .info-icon {
             position: fixed;
             bottom: 10px;
             left: 20px;
-            font-size: 1.2em; /* Adjust this value to change the icon size */
+            font-size: 1.2em;
             cursor: pointer;
-            color: cornflowerblue; /* Set the icon color to cornflower blue */
+            color: cornflowerblue;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Left Site Name -->
     <div class="site-name">x-cpu</div>
 
-    <!-- Canvas for the Animation -->
     <canvas id="animationCanvas"></canvas>
 
-    <!-- Footer Slogan -->
     <div class="slogan">
         "When I grow up, I want to be a robot"
     </div>
 
-    <!-- Info Icon for Email -->
     <div class="info-icon">
         <a href="mailto:info@x-cpu.com" style="color: cornflowerblue; text-decoration: none;">
             <i class="fas fa-envelope"></i>
         </a>
     </div>
 
-    <!-- Animation Script -->
     <script>
         const canvas = document.getElementById('animationCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
 
-        // Snake-like curve properties
         let points = [];
         const maxPoints = 150;
         let angle = 0;
         let speed = 0.1;
 
-        // Initializing mouse position for interactivity
         let mouseX = 0, mouseY = 0;
 
-        // Resize canvas to fit window
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -91,17 +74,12 @@
             height = canvas.height;
         }
 
-        // Drawing the snake-like animation
         function drawSnake() {
             ctx.clearRect(0, 0, width, height);
-            
-            // Add new point to the snake path
             points.push({ x: mouseX, y: mouseY });
             if (points.length > maxPoints) {
                 points.shift();
             }
-
-            // Draw each point of the snake
             ctx.beginPath();
             for (let i = 0; i < points.length; i++) {
                 let point = points[i];
@@ -113,36 +91,32 @@
             ctx.closePath();
         }
 
-        // Update mouse position
         canvas.addEventListener('mousemove', (event) => {
             mouseX = event.clientX;
             mouseY = event.clientY;
         });
 
-        // Support touch devices
         canvas.addEventListener('touchmove', (event) => {
-            event.preventDefault(); // Prevent scrolling on touch devices
+            event.preventDefault();
             const touch = event.touches[0];
             mouseX = touch.clientX;
             mouseY = touch.clientY;
         });
 
-        // Click event to reset the snake position
         canvas.addEventListener('click', () => {
             points = [];
             angle = 0;
         });
 
-        // Animation loop
         function animate() {
-            resizeCanvas(); // Adjust canvas size on resize
+            resizeCanvas();
             drawSnake();
-            angle += speed;  // Change the angle to add curvature
+            angle += speed;
             requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', resizeCanvas);
-        animate();  // Start the animation loop
+        animate();
     </script>
 
 </body>
