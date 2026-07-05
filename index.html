@@ -1,123 +1,958 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>x-cpu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Courier, monospace; background-color: #121212; color: white; display: flex; min-height: 100vh; justify-content: center; align-items: center; position: relative; }
-        .site-name {
-            position: fixed;
-            top: 10px;
-            left: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            text-transform: lowercase;
-        }
-        #animationCanvas {
-            width: 100%;
-            height: 100%;
-            background-color: #1a1a1a;
-        }
-        .slogan {
-            position: fixed;
-            bottom: 10px;
-            right: 20px;
-            font-size: 1em;
-            font-style: italic;
-            color: white;
-        }
-        .info-icon {
-            position: fixed;
-            bottom: 10px;
-            left: 20px;
-            font-size: 1.2em;
-            cursor: pointer;
-            color: cornflowerblue;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x-cpu</title>
+<meta name="description" content="x-cpu — when I grow up, I want to be a robot. An independent deep-tech playground exploring machines, media and generative systems.">
+<meta property="og:title" content="x-cpu">
+<meta property="og:description" content="When I grow up, I want to be a robot.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.x-cpu.com">
+<meta name="theme-color" content="#05070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2305070a'/%3E%3Crect x='9' y='9' width='14' height='14' rx='2' fill='none' stroke='%2300ff88' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2300ff88'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05070a;
+    --bg-raise: #0a0e14;
+    --line: rgba(140, 180, 220, 0.08);
+    --line-strong: rgba(140, 180, 220, 0.16);
+    --text: #e8eef4;
+    --text-dim: #8a97a5;
+    --accent: #00ff88;
+    --accent-soft: rgba(0, 255, 136, 0.12);
+    --accent-2: #5b9dff;
+    --mono: "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
+    --display: "Orbitron", "Oxanium", var(--mono);
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+
+  ::selection { background: var(--accent); color: #04130b; }
+
+  /* ---------- background canvas + grid ---------- */
+  #field {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    display: block;
+  }
+
+  .grid-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, black 30%, transparent 85%);
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 90% 70% at 50% 40%, transparent 40%, rgba(2, 4, 7, 0.55) 100%);
+  }
+
+  /* ---------- cursor aura ---------- */
+  #aura {
+    position: fixed;
+    top: 0; left: 0;
+    width: 480px; height: 480px;
+    margin: -240px 0 0 -240px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(circle,
+      rgba(0, 255, 136, 0.07) 0%,
+      rgba(91, 157, 255, 0.04) 35%,
+      transparent 70%);
+    will-change: transform;
+  }
+
+  #cursor-dot {
+    position: fixed;
+    top: 0; left: 0;
+    width: 6px; height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.9), 0 0 32px rgba(0, 255, 136, 0.4);
+    pointer-events: none;
+    z-index: 100;
+    will-change: transform;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    #aura, #cursor-dot { display: none; }
+  }
+
+  /* ---------- structure ---------- */
+  .shell { position: relative; z-index: 3; }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px clamp(20px, 4vw, 48px);
+    background: linear-gradient(rgba(5, 7, 10, 0.85), rgba(5, 7, 10, 0));
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .brand {
+    font-family: var(--display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand .chip {
+    width: 14px; height: 14px;
+    border: 2px solid var(--accent);
+    border-radius: 3px;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  }
+  .brand .chip::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+    border-radius: 1px;
+    animation: chipPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: clamp(16px, 3vw, 36px);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 2px;
+    position: relative;
+    transition: color 0.25s ease;
+  }
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%; height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px clamp(20px, 6vw, 80px) 80px;
+    position: relative;
+  }
+
+  .status-line {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .status-line .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: chipPulse 1.8s ease-in-out infinite;
+  }
+
+  h1.glitch {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(3.2rem, 12.5vw, 9.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    text-transform: lowercase;
+    position: relative;
+    color: var(--text);
+    text-shadow: 0 0 60px rgba(0, 255, 136, 0.25);
+    user-select: none;
+  }
+  h1.glitch .cursor-block {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.82em;
+    background: linear-gradient(180deg, rgba(0, 214, 116, 0.55), rgba(0, 150, 90, 0.3));
+    border: 1px solid rgba(0, 214, 116, 0.35);
+    margin-left: 0.1em;
+    vertical-align: baseline;
+    transform: translateY(0.08em);
+    animation: cursorFade 1.6s ease-in-out infinite;
+    box-shadow: 0 0 14px rgba(0, 214, 116, 0.2);
+  }
+  @keyframes cursorFade {
+    0%   { opacity: 0.85; box-shadow: 0 0 16px rgba(0, 214, 116, 0.3); }
+    50%  { opacity: 0.08; box-shadow: 0 0 4px rgba(0, 214, 116, 0.05); }
+    100% { opacity: 0.85; box-shadow: 0 0 16px rgba(0, 214, 116, 0.3); }
+  }
+
+  h1.glitch::before,
+  h1.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+  h1.glitch::before { color: var(--accent); z-index: -1; }
+  h1.glitch::after { color: var(--accent-2); z-index: -2; }
+  h1.glitch.glitching::before {
+    opacity: 0.8;
+    animation: glitchShift 0.32s steps(2) both;
+  }
+  h1.glitch.glitching::after {
+    opacity: 0.8;
+    animation: glitchShift2 0.32s steps(2) both;
+  }
+  @keyframes glitchShift {
+    0% { transform: translate(-4px, 2px); clip-path: inset(10% 0 55% 0); }
+    50% { transform: translate(3px, -1px); clip-path: inset(60% 0 8% 0); }
+    100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); opacity: 0; }
+  }
+  @keyframes glitchShift2 {
+    0% { transform: translate(4px, -2px); clip-path: inset(55% 0 12% 0); }
+    50% { transform: translate(-3px, 1px); clip-path: inset(6% 0 68% 0); }
+    100% { transform: translate(0, 0); clip-path: inset(0 0 0 0); opacity: 0; }
+  }
+
+  .hero-tagline {
+    margin-top: 32px;
+    max-width: 560px;
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .hero-tagline em {
+    color: var(--text);
+    font-style: italic;
+  }
+
+  .hero-actions {
+    margin-top: 48px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 4px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+    will-change: transform;
+  }
+  .btn-primary {
+    color: #04130b;
+    background: var(--accent);
+    box-shadow: 0 0 0 rgba(0, 255, 136, 0);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 32px rgba(0, 255, 136, 0.45), 0 0 80px rgba(0, 255, 136, 0.15);
+  }
+  .btn-ghost {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line-strong);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(0, 255, 136, 0.5);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.7;
+  }
+  .scroll-hint .line {
+    width: 1px;
+    height: 42px;
+    background: linear-gradient(var(--accent), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* ---------- sections ---------- */
+  section {
+    position: relative;
+    padding: clamp(80px, 12vw, 140px) clamp(20px, 6vw, 80px);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .section-label::before {
+    content: "";
+    width: 36px;
+    height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: clamp(1.7rem, 4.5vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    max-width: 720px;
+  }
+
+  .lede {
+    color: var(--text-dim);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    max-width: 640px;
+  }
+
+  /* manifesto quote */
+  .manifesto {
+    margin-top: 56px;
+    position: relative;
+    padding: clamp(28px, 5vw, 56px);
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  .manifesto::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.7), transparent);
+  }
+  .manifesto blockquote {
+    font-family: var(--mono);
+    font-size: clamp(1.3rem, 3.4vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+  }
+  .manifesto blockquote .q { color: var(--accent); }
+  .manifesto cite {
+    display: block;
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-style: normal;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* signal cards */
+  .signals {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .signal {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 26px 24px;
+    background: rgba(255, 255, 255, 0.014);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  }
+  .signal:hover {
+    border-color: rgba(0, 255, 136, 0.35);
+    background: rgba(0, 255, 136, 0.03);
+    transform: translateY(-3px);
+  }
+  .signal .idx {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .signal h3 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+  .signal p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  .signal canvas {
+    position: absolute;
+    right: 12px;
+    top: 14px;
+    opacity: 0.55;
+  }
+
+  /* ---------- contact ---------- */
+  .contact-panel {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding: clamp(28px, 5vw, 52px);
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: linear-gradient(140deg, rgba(0, 255, 136, 0.05), rgba(91, 157, 255, 0.03) 60%, transparent);
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.5;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse at 100% 0%, black, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at 100% 0%, black, transparent 70%);
+  }
+  .contact-copy h2 { margin-bottom: 8px; }
+  .contact-copy p {
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+  }
+  .contact-copy a.plain {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(0, 255, 136, 0.4);
+  }
+
+  /* ---------- footer ---------- */
+  footer {
+    position: relative;
+    z-index: 3;
+    border-top: 1px solid var(--line);
+    padding: 32px clamp(20px, 6vw, 80px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+  footer .slogan { font-style: italic; }
+  footer a { color: var(--text-dim); text-decoration: none; transition: color 0.25s; }
+  footer a:hover { color: var(--accent); }
+
+  /* ---------- reveal animations ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal[data-delay="1"] { transition-delay: 0.12s; }
+  .reveal[data-delay="2"] { transition-delay: 0.24s; }
+  .reveal[data-delay="3"] { transition-delay: 0.36s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001s !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001s !important;
+    }
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; }
+    #aura, #cursor-dot { display: none; }
+  }
+
+  @media (max-width: 560px) {
+    .nav-links { font-size: 0.72rem; gap: 14px; }
+    .hero { padding-top: 100px; }
+    .hero-actions .btn { width: 100%; justify-content: center; }
+    .scroll-hint { display: none; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="site-name">x-cpu</div>
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div id="aura" aria-hidden="true"></div>
+<div id="cursor-dot" aria-hidden="true"></div>
 
-    <canvas id="animationCanvas"></canvas>
+<div class="shell">
 
-    <div class="slogan">
-        "When I grow up, I want to be a robot"
+  <nav>
+    <a class="brand" href="#top" aria-label="x-cpu home">
+      <span class="chip" aria-hidden="true"></span>
+      x-cpu
+    </a>
+    <div class="nav-links">
+      <a href="#signal">Signal</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="status-line reveal">
+      <span class="dot" aria-hidden="true"></span>
+      system online // x-cpu.com
+    </div>
+    <h1 class="glitch" id="brandTitle" data-text="x-cpu">x-cpu<span class="cursor-block" aria-hidden="true"></span></h1>
+    <p class="hero-tagline reveal" data-delay="1">
+      <em>Where circuits dream and humans compute</em>
+      &mdash; a small studio at the edge of machines, media and generative systems.
+    </p>
+    <div class="hero-actions reveal" data-delay="2">
+      <a class="btn btn-primary magnetic" href="mailto:info@x-cpu.com">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        initiate contact
+      </a>
+      <a class="btn btn-ghost magnetic" href="#signal">explore signal</a>
+    </div>
+    <div class="scroll-hint" aria-hidden="true">
+      <span>scroll</span>
+      <span class="line"></span>
+    </div>
+  </header>
+
+  <section id="signal">
+    <div class="section-label reveal">signal / 01</div>
+    <h2 class="reveal">Human curiosity.<br>Machine precision.</h2>
+    <p class="lede reveal" data-delay="1">
+      x-cpu is an independent playground for experiments in computation, generative
+      media and the strange space where hardware dreams meet software instinct.
+    </p>
+
+    <div class="manifesto reveal" data-delay="2">
+      <blockquote>
+        <span class="q">&ldquo;</span>Growing up is optional. Upgrading is not.<span class="q">&rdquo;</span>
+      </blockquote>
+      <cite>// operating principle 001</cite>
     </div>
 
-    <div class="info-icon">
-        <a href="mailto:info@x-cpu.com" style="color: cornflowerblue; text-decoration: none;">
-            <i class="fas fa-envelope"></i>
-        </a>
+    <div class="signals">
+      <div class="signal reveal">
+        <span class="idx">[ 01 ]</span>
+        <canvas class="spark" width="72" height="26" aria-hidden="true"></canvas>
+        <h3>compute</h3>
+        <p>Pushing pixels, weights and waveforms through silicon until something unexpected comes back.</p>
+      </div>
+      <div class="signal reveal" data-delay="1">
+        <span class="idx">[ 02 ]</span>
+        <canvas class="spark" width="72" height="26" aria-hidden="true"></canvas>
+        <h3>create</h3>
+        <p>Generative images, video and sound — machine output shaped by human taste.</p>
+      </div>
+      <div class="signal reveal" data-delay="2">
+        <span class="idx">[ 03 ]</span>
+        <canvas class="spark" width="72" height="26" aria-hidden="true"></canvas>
+        <h3>connect</h3>
+        <p>Open experiments, shared signals. If it resonates, get in touch.</p>
+      </div>
     </div>
+  </section>
 
-    <script>
-        const canvas = document.getElementById('animationCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
+  <section id="contact">
+    <div class="section-label reveal">contact / 02</div>
+    <div class="contact-panel reveal" data-delay="1">
+      <div class="contact-copy">
+        <h2>Open a channel.</h2>
+        <p>&gt; ping <a class="plain" href="mailto:info@x-cpu.com">info@x-cpu.com</a></p>
+      </div>
+      <a class="btn btn-primary magnetic" href="mailto:info@x-cpu.com">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        info@x-cpu.com
+      </a>
+    </div>
+  </section>
 
-        let points = [];
-        const maxPoints = 150;
-        let angle = 0;
-        let speed = 0.1;
+  <footer>
+    <span>&copy; <span id="year">2026</span> x-cpu</span>
+    <span class="slogan">&ldquo;When I grow up, I want to be a robot&rdquo;</span>
+    <a href="mailto:info@x-cpu.com">info@x-cpu.com</a>
+  </footer>
 
-        let mouseX = 0, mouseY = 0;
+</div>
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            width = canvas.width;
-            height = canvas.height;
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var isCoarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  /* ============ particle field + heritage green trail ============ */
+  var canvas = document.getElementById("field");
+  var ctx = canvas.getContext("2d");
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+  var mouse = { x: -9999, y: -9999, active: false };
+  var particles = [];
+  var trail = [];           // the original x-cpu green snake, reborn
+  var TRAIL_MAX = 90;
+  var running = true;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+  }
+
+  function seed() {
+    var target = Math.min(140, Math.floor((W * H) / 12000));
+    particles.length = 0;
+    for (var i = 0; i < target; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.6 + 0.5,
+        hue: Math.random() < 0.75 ? 150 : 215   // mostly green, some blue
+      });
+    }
+  }
+
+  function step() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+
+    var linkDist = Math.min(150, W * 0.12);
+    var i, j, p, q, dx, dy, d2;
+
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+
+      // gentle drift
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // mouse repulsion — the field bends around you
+      if (mouse.active) {
+        dx = p.x - mouse.x;
+        dy = p.y - mouse.y;
+        d2 = dx * dx + dy * dy;
+        if (d2 < 22500 && d2 > 0.01) {
+          var f = (150 - Math.sqrt(d2)) / 150 * 0.6;
+          var inv = 1 / Math.sqrt(d2);
+          p.x += dx * inv * f;
+          p.y += dy * inv * f;
         }
+      }
 
-        function drawSnake() {
-            ctx.clearRect(0, 0, width, height);
-            points.push({ x: mouseX, y: mouseY });
-            if (points.length > maxPoints) {
-                points.shift();
-            }
-            ctx.beginPath();
-            for (let i = 0; i < points.length; i++) {
-                let point = points[i];
-                ctx.lineTo(point.x, point.y);
-            }
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#00FF00';
-            ctx.stroke();
-            ctx.closePath();
+      if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
+      if (p.y < -20) p.y = H + 20; else if (p.y > H + 20) p.y = -20;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.hue === 150
+        ? "rgba(0, 255, 136, 0.55)"
+        : "rgba(91, 157, 255, 0.5)";
+      ctx.fill();
+    }
+
+    // constellation links
+    ctx.lineWidth = 0.6;
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      for (j = i + 1; j < particles.length; j++) {
+        q = particles[j];
+        dx = p.x - q.x;
+        dy = p.y - q.y;
+        d2 = dx * dx + dy * dy;
+        if (d2 < linkDist * linkDist) {
+          var a = (1 - Math.sqrt(d2) / linkDist) * 0.18;
+          ctx.strokeStyle = "rgba(120, 200, 170," + a + ")";
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
         }
+      }
+    }
 
-        canvas.addEventListener('mousemove', (event) => {
-            mouseX = event.clientX;
-            mouseY = event.clientY;
-        });
+    // heritage trail — glowing green line that follows the cursor
+    if (trail.length > 1) {
+      for (i = 1; i < trail.length; i++) {
+        var t0 = trail[i - 1], t1 = trail[i];
+        var alpha = (i / trail.length) * 0.65;
+        ctx.strokeStyle = "rgba(0, 255, 136," + alpha + ")";
+        ctx.lineWidth = (i / trail.length) * 3 + 0.4;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(t0.x, t0.y);
+        ctx.lineTo(t1.x, t1.y);
+        ctx.stroke();
+      }
+      // fade out when idle
+      if (!mouse.moving) trail.shift();
+      mouse.moving = false;
+    }
 
-        canvas.addEventListener('touchmove', (event) => {
-            event.preventDefault();
-            const touch = event.touches[0];
-            mouseX = touch.clientX;
-            mouseY = touch.clientY;
-        });
+    requestAnimationFrame(step);
+  }
 
-        canvas.addEventListener('click', () => {
-            points = [];
-            angle = 0;
-        });
+  window.addEventListener("pointermove", function (e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+    mouse.moving = true;
+    if (!reduceMotion) {
+      trail.push({ x: e.clientX, y: e.clientY });
+      if (trail.length > TRAIL_MAX) trail.shift();
+    }
+  }, { passive: true });
 
-        function animate() {
-            resizeCanvas();
-            drawSnake();
-            angle += speed;
-            requestAnimationFrame(animate);
+  window.addEventListener("pointerleave", function () {
+    mouse.active = false;
+  });
+
+  // click = pulse: scatter nearby particles outward (replaces old click-to-clear)
+  window.addEventListener("pointerdown", function (e) {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var dx = p.x - e.clientX;
+      var dy = p.y - e.clientY;
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (d < 220) {
+        var f = (220 - d) / 220 * 7;
+        p.vx += (dx / d) * f * 0.4;
+        p.vy += (dy / d) * f * 0.4;
+        setTimeout((function (pp) {
+          return function () { pp.vx *= 0.12; pp.vy *= 0.12; };
+        })(p), 350);
+      }
+    }
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    running = !document.hidden;
+    if (running) requestAnimationFrame(step);
+  });
+
+  window.addEventListener("resize", resize);
+  resize();
+  if (!reduceMotion) {
+    requestAnimationFrame(step);
+  } else {
+    // static field for reduced motion
+    ctx.clearRect(0, 0, W, H);
+    for (var k = 0; k < particles.length; k++) {
+      var sp = particles[k];
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0,255,136,0.4)";
+      ctx.fill();
+    }
+  }
+
+  /* ============ cursor aura + dot (lerped follow) ============ */
+  if (!isCoarse && !reduceMotion) {
+    var aura = document.getElementById("aura");
+    var dot = document.getElementById("cursor-dot");
+    var ax = W / 2, ay = H / 2, dxp = ax, dyp = ay;
+    var px = ax, py = ay;
+
+    window.addEventListener("pointermove", function (e) {
+      px = e.clientX;
+      py = e.clientY;
+    }, { passive: true });
+
+    (function follow() {
+      ax += (px - ax) * 0.06;
+      ay += (py - ay) * 0.06;
+      dxp += (px - dxp) * 0.35;
+      dyp += (py - dyp) * 0.35;
+      aura.style.transform = "translate(" + ax + "px," + ay + "px)";
+      dot.style.transform = "translate(" + dxp + "px," + dyp + "px)";
+      requestAnimationFrame(follow);
+    })();
+  }
+
+  /* ============ magnetic buttons ============ */
+  if (!isCoarse && !reduceMotion) {
+    var magnets = document.querySelectorAll(".magnetic");
+    magnets.forEach(function (el) {
+      var strength = 18;
+      el.addEventListener("pointermove", function (e) {
+        var r = el.getBoundingClientRect();
+        var mx = e.clientX - (r.left + r.width / 2);
+        var my = e.clientY - (r.top + r.height / 2);
+        el.style.transform = "translate(" + (mx / r.width) * strength + "px," + (my / r.height) * strength + "px)";
+      });
+      el.addEventListener("pointerleave", function () {
+        el.style.transform = "translate(0, 0)";
+        el.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
+        setTimeout(function () { el.style.transition = ""; }, 400);
+      });
+    });
+  }
+
+  /* ============ scroll reveal ============ */
+  var reveals = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          io.unobserve(entry.target);
         }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add("visible"); });
+  }
 
-        window.addEventListener('resize', resizeCanvas);
-        animate();
-    </script>
+  /* ============ occasional title glitch ============ */
+  var title = document.getElementById("brandTitle");
+  if (!reduceMotion) {
+    (function scheduleGlitch() {
+      setTimeout(function () {
+        title.classList.add("glitching");
+        setTimeout(function () { title.classList.remove("glitching"); }, 340);
+        scheduleGlitch();
+      }, 3500 + Math.random() * 5000);
+    })();
+  }
+
+  /* ============ tiny waveform sparklines in cards ============ */
+  document.querySelectorAll(".spark").forEach(function (c, idx) {
+    var sctx = c.getContext("2d");
+    var t = idx * 40;
+    function draw() {
+      sctx.clearRect(0, 0, c.width, c.height);
+      sctx.beginPath();
+      for (var x = 0; x <= c.width; x++) {
+        var y = c.height / 2
+          + Math.sin((x + t) * 0.18) * 5
+          + Math.sin((x + t) * 0.045) * 4;
+        if (x === 0) sctx.moveTo(x, y); else sctx.lineTo(x, y);
+      }
+      sctx.strokeStyle = "rgba(0, 255, 136, 0.8)";
+      sctx.lineWidth = 1;
+      sctx.stroke();
+      t += 0.6;
+      if (!reduceMotion) requestAnimationFrame(draw);
+    }
+    draw();
+  });
+
+})();
+</script>
 
 </body>
 </html>
