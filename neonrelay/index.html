@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeonRelay — IPTV player for Fire TV &amp; Android TV · x-cpu</title>
+<meta name="description" content="NeonRelay is a fast, remote-friendly IPTV player for Amazon Fire TV and Android TV / Google TV. Bring your own provider: Xtream Codes login or M3U playlist, with a full TV guide. Free download.">
+<meta property="og:title" content="NeonRelay — IPTV player for Fire TV &amp; Android TV">
+<meta property="og:description" content="Bring your own provider. Live TV, TV guide, catch-up, movies and series in a neon interface built for the remote.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://x-cpu.com/neonrelay/">
+<meta property="og:image" content="https://x-cpu.com/neonrelay/img/neonrelay-banner.png">
+<meta name="theme-color" content="#05070a">
+<link rel="icon" type="image/png" href="/neonrelay/img/neonrelay-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/subpage.css">
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/" aria-label="x-cpu home"><span class="chip" aria-hidden="true"></span>x-cpu</a>
+  <div class="nav-links">
+    <a href="/projects/">Projects</a>
+    <a href="#download">Download</a>
+    <a href="#setup">Setup</a>
+    <a href="#faq">FAQ</a>
+    <a href="/neonrelay/privacy/">Privacy</a>
+  </div>
+</nav>
+
+<main>
+  <div class="section-label">Project</div>
+  <h1><span class="neon">NeonRelay</span></h1>
+  <p class="lede">An IPTV player for <strong>Amazon Fire TV</strong> and <strong>Android TV / Google TV</strong>, built for the remote. Bring your own provider and get live TV, a full TV guide and on-demand movies and series in a fast neon interface.</p>
+
+  <img class="hero-art" src="/neonrelay/img/neonrelay-banner.png" width="1280" height="720" alt="NeonRelay logo: a neon cyan and magenta N with circuit traces">
+
+  <div class="actions">
+    <a class="btn btn-primary" href="#download">Download free</a>
+  </div>
+
+  <h2>Features</h2>
+  <div class="features">
+    <div class="feature"><h3>Your provider, your login</h3><p>Sign in with an Xtream Codes account or paste an M3U / M3U8 playlist link. Add an XMLTV guide link, or use the guide your playlist already includes.</p></div>
+    <div class="feature"><h3>TV guide &amp; catch-up</h3><p>A timeline guide with now/next, and catch-up playback when your provider supports it.</p></div>
+    <div class="feature"><h3>Movies &amp; series</h3><p>Poster grids, resume where you left off and auto-play of the next episode.</p></div>
+    <div class="feature"><h3>Multi-view</h3><p>Two or four live channels at once. NeonRelay respects your plan's stream limit and only plays as many screens as your provider allows.</p></div>
+    <div class="feature"><h3>Stream recovery</h3><p>Reconnects automatically when a server drops a live stream, and unfreezes stalled video on its own.</p></div>
+    <div class="feature"><h3>Optional VPN lock</h3><p>Turn on <em>Require VPN</em> and NeonRelay stops all streaming whenever your VPN disconnects.</p></div>
+  </div>
+
+  <p class="note"><strong>NeonRelay does not include any channels or content.</strong> It plays streams from a service you already subscribe to. Only use it with providers and content you have the rights to watch.</p>
+
+  <h2 id="download">Download</h2>
+  <div class="download-card">
+    <img src="/neonrelay/img/neonrelay-icon.png" width="96" height="96" alt="">
+    <div class="download-body">
+      <div class="download-title">NeonRelay <span class="tag">v0.3.2</span></div>
+      <dl class="specs">
+        <div><dt>Released</dt><dd>November 4, 2026</dd></div>
+        <div><dt>Size</dt><dd>2.9 MB</dd></div>
+        <div><dt>Needs</dt><dd>Android 5.1 or later, TV devices</dd></div>
+        <div><dt>Price</dt><dd>Free, no ads</dd></div>
+      </dl>
+      <a class="btn btn-primary" href="/neonrelay/neonrelay.apk" download>Download APK</a>
+    </div>
+  </div>
+  <p>On your TV, open the <strong>Downloader</strong> app and enter this address:</p>
+  <p class="big-url"><code>x-cpu.com/neonrelay/neonrelay.apk</code></p>
+  <p class="fine">SHA-256: <code class="hash">09192cc63de704825c36ff8081424802de4c9fa26e13228f582749a2a9702191</code></p>
+
+  <h3>Which devices work?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Device</th><th>Works?</th></tr></thead>
+      <tbody>
+        <tr><td>Fire TV Stick 4K Max, Fire TV Stick 4K (2018 and 2023 models), Fire TV Stick Lite and older Fire TV Sticks</td><td class="yes">Yes</td></tr>
+        <tr><td>Fire TV Cube, Fire TV smart TVs (Fire OS)</td><td class="yes">Yes</td></tr>
+        <tr><td>Google TV and Android TV: Chromecast with Google TV, Google TV Streamer, onn, NVIDIA Shield, Sony, TCL, Hisense, projectors</td><td class="yes">Yes</td></tr>
+        <tr><td>Fire TV Stick 4K Select, the 2026 Fire TV Stick HD and Fire TV Stick 4K, and other Vega OS devices</td><td class="no">No: these can't install apps from outside the Amazon Appstore</td></tr>
+        <tr><td>Phones and tablets</td><td class="no">Not yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="setup">Setup</h2>
+  <div class="steps-grid">
+    <div class="steps">
+      <h3>Fire TV</h3>
+      <ol>
+        <li>Turn on Developer options: go to <strong>Settings &rsaquo; My Fire TV &rsaquo; About</strong> and press OK on your device's name 7 times.</li>
+        <li>Open the Appstore, search for <strong>Downloader</strong> (by AFTVnews) and install it.</li>
+        <li>Go to <strong>Settings &rsaquo; My Fire TV &rsaquo; Developer options &rsaquo; Install unknown apps</strong> and turn <strong>Downloader</strong> on.</li>
+        <li>Open Downloader, enter <code>x-cpu.com/neonrelay/neonrelay.apk</code> and select <strong>Go</strong>.</li>
+        <li>Select <strong>Install</strong>, then <strong>Done</strong>. Downloader offers to delete the file to free up space; it's safe to delete.</li>
+      </ol>
+    </div>
+    <div class="steps">
+      <h3>Google TV / Android TV</h3>
+      <ol>
+        <li>Turn on Developer options: go to <strong>Settings &rsaquo; System &rsaquo; About</strong> and press OK on <strong>Android TV OS build</strong> 7 times.</li>
+        <li>Open the Play Store, search for <strong>Downloader</strong> (by AFTVnews) and install it.</li>
+        <li>Go to <strong>Settings &rsaquo; Apps &rsaquo; Security &amp; restrictions &rsaquo; Unknown sources</strong> and turn <strong>Downloader</strong> on.</li>
+        <li>Open Downloader, enter <code>x-cpu.com/neonrelay/neonrelay.apk</code> and select <strong>Go</strong>.</li>
+        <li>Select <strong>Install</strong>, then <strong>Done</strong>.</li>
+      </ol>
+      <p class="fine">Menu names vary a little between TV brands.</p>
+    </div>
+  </div>
+
+  <h3>Try it without a provider</h3>
+  <p>Want to see NeonRelay before connecting your own service? Choose <strong>M3U playlist link</strong> during setup and enter:</p>
+  <p><code>https://x-cpu.com/neonrelay/demo/demo.m3u</code></p>
+  <p>The demo lineup uses openly licensed films (Big Buck Bunny and Tears of Steel by the Blender Foundation, CC BY) and public HLS test streams, with a built-in TV guide.</p>
+
+  <h2 id="faq">FAQ</h2>
+  <div class="faq">
+    <details>
+      <summary>Does NeonRelay come with channels?</summary>
+      <p>No. NeonRelay is a player only. You need a subscription from a TV service provider that gives you an Xtream Codes login or an M3U playlist link.</p>
+    </details>
+    <details>
+      <summary>Is it free?</summary>
+      <p>Yes. No ads, no accounts, no in-app purchases.</p>
+    </details>
+    <details>
+      <summary>Is my login safe?</summary>
+      <p>Your login is stored only on your TV and is sent only to your provider, never to x-cpu. NeonRelay has no analytics or tracking. See the <a href="/neonrelay/privacy/">privacy policy</a>.</p>
+    </details>
+    <details>
+      <summary>Why can't I install it on my new Fire TV Stick?</summary>
+      <p>Amazon's newest sticks (Fire TV Stick 4K Select, and the 2026 Fire TV Stick HD and Fire TV Stick 4K) run Vega OS, which can only install apps from the Amazon Appstore. NeonRelay works on Fire TV devices that run Fire OS, which includes every Fire TV Stick 4K Max, Fire TV Cube and Fire TV smart TV.</p>
+    </details>
+    <details>
+      <summary>How do I update?</summary>
+      <p>Repeat the download step with the same address. Installing the new version over the old one keeps your login, favorites and history.</p>
+    </details>
+    <details>
+      <summary>Why does the icon look small on Fire TV?</summary>
+      <p>Fire TV shows apps installed from outside the Amazon Appstore as a small icon in a grey tile. It's a Fire TV limitation and doesn't affect the app.</p>
+    </details>
+    <details>
+      <summary>Video stops or won't play. What can I try?</summary>
+      <p>NeonRelay retries dropped streams on its own. If a channel still won't play, check it on another device first: most playback errors come from the provider or the stream itself. If you turned on <em>Require VPN</em>, make sure your VPN is connected.</p>
+    </details>
+  </div>
+
+  <h2 id="changelog">What's new</h2>
+  <div class="changelog">
+    <div class="release">
+      <div class="release-head"><span class="tag">v0.3.2</span><span>November 4, 2026</span></div>
+      <ul>
+        <li>First public release.</li>
+        <li>Updated for Android 16.</li>
+        <li>Smaller, faster app.</li>
+        <li><em>Require VPN</em> is now optional and off by default.</li>
+        <li>New icon and artwork.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Support</h2>
+  <p>See the <a href="/support/">support page</a>, or email <a href="mailto:info@x-cpu.com?subject=NeonRelay">info@x-cpu.com</a>.</p>
+</main>
+
+<footer>
+  <span>NeonRelay is a product of <a href="/">x-cpu</a> &middot; &copy; 2026</span>
+  <a href="/neonrelay/privacy/">Privacy policy</a>
+  <a href="mailto:info@x-cpu.com">info@x-cpu.com</a>
+</footer>
+
+</body>
+</html>

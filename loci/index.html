@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOCI (LOH-sigh) — private, offline voice assistant for Mac &amp; Windows · x-cpu</title>
+<meta name="description" content="LOCI is a voice assistant that runs entirely on your own Mac or Windows PC. Local AI models, local speech, local notes. Nothing is sent to the cloud unless you ask it to.">
+<meta property="og:title" content="LOCI — a private voice assistant that runs on your own computer">
+<meta property="og:description" content="Local AI models, local speech recognition and voice, and a second brain of notes that never leaves your machine.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://x-cpu.com/loci/">
+<meta property="og:image" content="https://x-cpu.com/loci/img/loci-xcpu.jpg">
+<meta name="theme-color" content="#05070a">
+<link rel="icon" type="image/png" href="/loci/img/loci-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/subpage.css">
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/" aria-label="x-cpu home"><span class="chip" aria-hidden="true"></span>x-cpu</a>
+  <div class="nav-links">
+    <a href="/projects/">Projects</a>
+    <a href="#install">Install</a>
+    <a href="#faq">FAQ</a>
+    <a href="/support/">Support</a>
+  </div>
+</nav>
+
+<main>
+  <div class="section-label">Project</div>
+  <h1><span class="neon">LOCI</span></h1>
+  <p class="pronounce">Say it <strong>LOH-sigh</strong> &middot; <strong>L</strong>ocal <strong>O</strong>ffline <strong>C</strong>ognitive <strong>I</strong>nterface</p>
+  <p class="lede">A voice assistant that runs entirely on <strong>your own Mac or Windows PC</strong>. LOCI's AI models, speech recognition, voice and notes all stay on your computer, and it works with no internet connection.</p>
+
+  <img class="hero-art" src="/loci/img/loci-xcpu.jpg" width="1901" height="876" alt="The LOCI dashboard in the x-cpu theme: a glowing two-sided brain for System One and reasoning in the centre, the loaded AI models on the left, a map of notes and the transcript on the right">
+
+  <div class="actions">
+    <a class="btn btn-primary" href="#install">See how it installs</a>
+    <a class="btn btn-ghost" href="#looks">See the themes</a>
+  </div>
+
+  <h2>Features</h2>
+  <div class="features">
+    <div class="feature"><h3>Made for Apple M4</h3><p>LOCI was built and tuned on an M4 Mac with 16 GB of memory. The M4's built-in GPU and fast shared memory run the AI model, speech recognition and voice together, with no extra graphics card or cloud needed. Any M1 or newer Mac works.</p></div>
+    <div class="feature"><h3>Fully offline</h3><p>Language models run locally through Ollama, speech recognition through Whisper and the voice through Kokoro. The dashboard shows a live count of cloud calls and data sent, and both stay at zero.</p></div>
+    <div class="feature"><h3>Talk or type</h3><p>Hold Space to talk, or type in the bar. Choose a female or male voice, with UK and US accents and more.</p></div>
+    <div class="feature"><h3>Instant everyday commands</h3><p>Timers, opening apps and the time are handled by <em>System One</em>, a fast classifier that answers in milliseconds without waiting for the AI model.</p></div>
+    <div class="feature"><h3>Second brain</h3><p>Your notes, goals and memories are stored as files on your computer, and LOCI searches them to answer you.</p></div>
+    <div class="feature"><h3>Find your files</h3><p>Ask for a document and LOCI finds and opens it, searching only the folders you allow.</p></div>
+    <div class="feature"><h3>Optional online hand-offs</h3><p>Say "ask Claude to …" to pass a bigger job to Claude Code or Codex. These are off unless you install and sign in to those tools yourself.</p></div>
+  </div>
+
+  <h2 id="looks">Three looks</h2>
+  <p>Switch themes any time with the <strong>THEME</strong> button. Above is <strong>x-cpu</strong>, the default.</p>
+  <div class="shots">
+    <figure><img src="/loci/img/loci-ova.jpg" width="1900" height="875" loading="lazy" alt="The LOCI dashboard in the Retro OVA theme: an amber and magenta energy sphere in an 80s anime cockpit"><figcaption><strong>Retro OVA</strong>: an 80s anime cockpit in amber and magenta.</figcaption></figure>
+    <figure><img src="/loci/img/loci-classic.jpg" width="1900" height="875" loading="lazy" alt="The LOCI dashboard in the Classic theme: a cyan HUD of rings around an L.O.C.I. core"><figcaption><strong>Classic</strong>: a cyan HUD of rings around the L.O.C.I. core.</figcaption></figure>
+  </div>
+
+  <h2 id="download">Download</h2>
+  <div class="download-card">
+    <img src="/loci/img/loci-icon.png" width="96" height="96" alt="">
+    <div class="download-body">
+      <div class="download-title">LOCI <span class="tag">v1.0 · Experimental</span></div>
+      <dl class="specs">
+        <div><dt>Platforms</dt><dd>macOS (Apple Silicon, best on M4), Windows 10 / 11</dd></div>
+        <div><dt>Download</dt><dd>Small installer; the models (about 9 GB) download during setup</dd></div>
+        <div><dt>Memory</dt><dd>16 GB recommended</dd></div>
+        <div><dt>Price</dt><dd>Free</dd></div>
+      </dl>
+      <a class="btn btn-ghost" aria-disabled="true">Download coming soon</a>
+    </div>
+  </div>
+
+  <h3>Requirements</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Mac</th><th>Windows</th></tr></thead>
+      <tbody>
+        <tr><td>Computer</td><td>Apple Silicon (M1 or newer). Built and tuned on an M4.</td><td>Windows 10 (1809+) or 11, 64-bit</td></tr>
+        <tr><td>Memory</td><td>16 GB recommended (8 GB works, more slowly)</td><td>16 GB recommended</td></tr>
+        <tr><td>Graphics</td><td>Built in</td><td>NVIDIA with 8 GB or more works best. Without one, LOCI uses a smaller model on the processor.</td></tr>
+        <tr><td>Disk space</td><td>About 9 GB</td><td>About 10 GB</td></tr>
+        <tr><td>Microphone</td><td colspan="2">Any. A Mac mini has no built-in mic, so use a USB or Bluetooth one.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="install">Install</h2>
+  <div class="steps-grid">
+    <div class="steps">
+      <h3>Mac</h3>
+      <ol>
+        <li>Install <a href="https://brew.sh">Homebrew</a> if your Mac doesn't already have it.</li>
+        <li>Download <strong>loci.zip</strong>, double-click it, and move the <strong>loci</strong> folder into <strong>Documents</strong>.</li>
+        <li>Open <strong>Terminal</strong> and run:<br><code>cd ~/Documents/loci &amp;&amp; ./install.sh</code></li>
+        <li>Answer the three questions: where to keep the models, what LOCI should call you, and which voice you want. The download takes a while the first time.</li>
+        <li>Run <code>./start.sh</code>. Your browser opens the dashboard. Click <strong>ENGAGE</strong> and allow the microphone.</li>
+      </ol>
+      <p class="fine">To start LOCI automatically when you log in, run <code>./install-always-on.sh</code>.</p>
+    </div>
+    <div class="steps">
+      <h3>Windows</h3>
+      <ol>
+        <li>Download <strong>loci.zip</strong>, right-click it, choose <strong>Extract All</strong>, and extract it to <strong>Documents</strong>.</li>
+        <li>Open <strong>Terminal</strong> or <strong>Windows PowerShell</strong>. Don't use PowerShell ISE.</li>
+        <li>Run:<br><code>cd ~\Documents\loci</code><br><code>powershell -ExecutionPolicy Bypass -File .\install.ps1</code></li>
+        <li>Approve the one administrator prompt (for Node.js), then answer the same three questions.</li>
+        <li>Run <code>powershell -ExecutionPolicy Bypass -File .\start.ps1</code> and keep that window open. Click <strong>ENGAGE</strong> in the browser.</li>
+      </ol>
+      <p class="fine">The installer checks your graphics card and chooses the right model size.</p>
+    </div>
+  </div>
+
+  <h3>Updating</h3>
+  <p>Download the new <strong>loci.zip</strong> and copy its contents over your <strong>loci</strong> folder, then run the installer again. Your settings (<code>config.json</code>) and your notes (<code>brain/</code>) are kept.</p>
+
+  <h2 id="faq">FAQ</h2>
+  <div class="faq">
+    <details>
+      <summary>Is this like JARVIS from the movies?</summary>
+      <p>That's the idea: a talking assistant with a glowing HUD that knows your notes and runs your errands. Unlike the movie version, LOCI runs on your own computer and keeps everything to itself. LOCI is an independent project and isn't affiliated with Marvel or Disney.</p>
+    </details>
+    <details>
+      <summary>Does anything leave my computer?</summary>
+      <p>No. Models, speech and notes are all local, and there are no analytics. The only exception is a hand-off ("ask Claude to …"), which you have to set up yourself. Hand-offs send that one request to Claude Code or Codex.</p>
+    </details>
+    <details>
+      <summary>Why is the first answer slow?</summary>
+      <p>The first time after LOCI starts, the model has to load into memory. Later answers start in about a second. On Windows, the very first start after installing can take about two minutes.</p>
+    </details>
+    <details>
+      <summary>It says "Another Ollama is running".</summary>
+      <p>Quit the Ollama app from the menu bar or system tray, then start LOCI again. LOCI runs its own copy of Ollama with its own models folder.</p>
+    </details>
+    <details>
+      <summary>The browser shows a microphone error.</summary>
+      <p>Connect a microphone, select it in your computer's sound input settings, and allow microphone access for <code>localhost</code> in the browser.</p>
+    </details>
+    <details>
+      <summary>It mishears a name.</summary>
+      <p>Add the word to <code>vocabulary</code> in <code>config.json</code> and restart LOCI.</p>
+    </details>
+    <details>
+      <summary>Windows says "running scripts is disabled".</summary>
+      <p>Run scripts in the form <code>powershell -ExecutionPolicy Bypass -File .\script.ps1</code>, as shown in the install steps.</p>
+    </details>
+    <details>
+      <summary>The dashboard won't load, or a port is in use.</summary>
+      <p>Stop LOCI and start it again. Security or VPN software can take LOCI's ports; running the installer again picks free ones. Logs are in the <code>.logs</code> folder.</p>
+    </details>
+  </div>
+
+  <h2>Support</h2>
+  <p>See the <a href="/support/">support page</a>, or email <a href="mailto:info@x-cpu.com?subject=LOCI">info@x-cpu.com</a>.</p>
+</main>
+
+<footer>
+  <span>LOCI is a product of <a href="/">x-cpu</a> &middot; &copy; 2026</span>
+  <a href="/projects/">All projects</a>
+  <a href="mailto:info@x-cpu.com">info@x-cpu.com</a>
+</footer>
+
+</body>
+</html>
