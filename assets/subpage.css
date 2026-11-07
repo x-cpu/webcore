@@ -399,3 +399,8 @@ footer a:hover { color: var(--accent); }
 .shots figure { margin: 0; }
 .shots img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line-strong); }
 .shots figcaption { font-size: 0.9rem; color: var(--text-dim); margin-top: 8px; }
+.runs-on { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); }
+.project ul.platforms { list-style: none; padding: 0; margin: 6px 0 14px; }
+.project ul.platforms li { font-family: var(--mono); font-size: 0.85rem; color: var(--text); padding-left: 16px; position: relative; }
+.project ul.platforms li + li { margin-top: 4px; }
+.project ul.platforms li::before { content: "\25B8"; position: absolute; left: 0; color: var(--accent); }
