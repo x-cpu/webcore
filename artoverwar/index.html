@@ -60,6 +60,7 @@
   .btn:active{transform:scale(.97)}
   .btn[disabled]{opacity:.5}
   .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{min-height:calc(var(--u)*38);padding:0 calc(var(--u)*16);font-size:calc(var(--u)*11.5)}
   .row{display:flex;gap:calc(var(--u)*10);flex-wrap:wrap;justify-content:center}
   .small{font-size:calc(var(--u)*11);color:var(--muted);line-height:1.5;max-width:calc(var(--u)*340)}
   .small a{color:var(--ink)}
@@ -123,13 +124,14 @@
       <h2 class="ttl" id="mTitle">Foxglove</h2>
       <p class="meta" id="mMeta">Chris Smith · Oil on canvas</p>
       <div class="pair">
-        <figure><img id="mArt" alt=""><figcaption>The painting</figcaption></figure>
+        <figure><a id="mArtLink" href="#" target="_blank" rel="noopener"><img id="mArt" alt=""></a><figcaption>The painting</figcaption></figure>
         <figure><a id="mBomberLink" href="#" target="_blank" rel="noopener"><img id="mBomber" alt=""></a><figcaption>Worn as art</figcaption></figure>
       </div>
       <p class="small" id="mStat"></p>
+      <button class="btn" id="nextBtn">Next wave</button>
       <div class="row">
-        <button class="btn" id="nextBtn">Next wave</button>
-        <a class="btn ghost" id="mShop" href="#" target="_blank" rel="noopener">See the bomber</a>
+        <a class="btn ghost sm" id="mPrint" href="#" target="_blank" rel="noopener">Get the print</a>
+        <a class="btn ghost sm" id="mShop" href="#" target="_blank" rel="noopener">See the bomber</a>
       </div>
     </div>
   </div>
@@ -178,13 +180,27 @@
 // field is 420 wide; height follows the device's aspect (fixed for the session) so phones fill edge to edge
 const W = 420, H = Math.round(Math.min(940, Math.max(700, 420 * window.innerHeight / Math.max(1, window.innerWidth)))), CITY = H - 128, PY = H - 66, RS = 2, TAU = Math.PI * 2;
 const PALETTE = ['#f2c14e', '#9b7bff', '#e2404f', '#3fd0c9', '#ff8fb1', '#f4f1ea'];
+// One entry per wave, cycling. print = giclée print page (null if none); shop = the bomber that carries the painting.
+const UM = 'https://urbanemuse.com/product/';
 const MURALS = [
   { art: 'img/foxglove.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-foxglove.jpg', title: 'Foxglove',
-    meta: 'Chris Smith · Oil on canvas', shop: 'https://urbanemuse.com/product/foxglove-mid-lightweight-bomber/',
-    product: 'Foxgloves Mid-Lightweight Bomber' },
-  { art: 'img/untitled.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-untitled.jpg', title: 'Untitled',
-    meta: 'Chris Smith · Oil on linen · 48 × 72 in', shop: 'https://urbanemuse.com/product/untitled-bomber-jacket/',
-    product: 'Untitled Printed Bomber Jacket' }
+    meta: 'Chris Smith · Oil on canvas', print: null,
+    shop: UM + 'foxglove-mid-lightweight-bomber/', product: 'Foxgloves Mid-Lightweight Bomber' },
+  { art: 'img/lion.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-lion.jpg', title: 'Lion Face',
+    meta: 'Chris Smith · Oil on canvas · 30 × 24 in', print: UM + 'lion-face-giclee-print/',
+    shop: UM + 'lion-print-bomber-jacket/', product: 'Lion Print Lightweight Bomber' },
+  { art: 'img/untitled.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-untitled.jpg', title: 'Untitled',
+    meta: 'Chris Smith · Oil on linen · 48 × 72 in', print: null,
+    shop: UM + 'untitled-bomber-jacket/', product: 'Untitled Printed Bomber Jacket' },
+  { art: 'img/nostalgia.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-nostalgia.jpg', title: 'Nostalgia Smith',
+    meta: 'Chris Smith · Oil on linen · 72 × 48 in', print: UM + 'nostalgia-smith-print/',
+    shop: UM + 'nostalgia-smith-bomber-jacket/', product: 'Nostalgia Smith Printed Bomber' },
+  { art: 'img/shoeshine.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-shoeshine.jpg', title: 'Shoe Shine',
+    meta: 'Chris Smith · Painting', print: null,
+    shop: UM + 'shoe-shine-print-bomber-jacket/', product: 'Shoe Shine Print Bomber' },
+  { art: 'img/dove.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-dove.jpg', title: 'Dove Study',
+    meta: 'Chris Smith · Graphite on paper · 24 × 18 in', print: UM + 'dove-sketch-giclee-print/',
+    shop: UM + 'dove-mid-lightweight-bomber/', product: 'Dove Mid-Lightweight Bomber' }
 ];
 
 // ---------- helpers ----------
@@ -330,7 +346,9 @@ const keys = {};
 function newGame() {
   player = { x: W / 2, tx: W / 2, inv: 0, fireT: 0, spread: 0, rapid: 0, ci: 0, bob: 0 };
   enemies = []; shots = []; shells = []; parts = []; powerups = [];
-  score = 0; hope = 3; wave = 0; converted = 0; murals = 0; combo = 1; lastConv = -9; gameT = 0; shake = 0;
+  // ?wave=N starts at wave N (handy for sharing a specific mural)
+  const qw = parseInt(new URLSearchParams(location.search).get('wave'), 10);
+  score = 0; hope = 3; wave = qw > 1 ? Math.min(qw, 60) - 1 : 0; converted = 0; murals = 0; combo = 1; lastConv = -9; gameT = 0; shake = 0;
   startWave();
 }
 function startWave() {
@@ -806,7 +824,8 @@ function showMural() {
   $('mMeta').textContent = mural.meta;
   $('mArt').src = mural.art; $('mBomber').src = mural.bomber;
   $('mBomberLink').href = mural.shop; $('mShop').href = mural.shop;
-  $('mShop').textContent = 'See the bomber';
+  $('mArtLink').href = mural.print || mural.shop;
+  $('mPrint').href = mural.print || '#'; $('mPrint').classList.toggle('hidden', !mural.print);
   $('mStat').textContent = waveConverted + ' war machines turned to art. Chris Smith’s painting also lives on the ' + mural.product + '.';
   show('muralOv', true);
 }
