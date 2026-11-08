@@ -166,7 +166,7 @@
       <p class="small">Art Over War is independent and self-funded. Every piece funds the next collection.<br>
         <a href="https://urbanemuse.com/product-category/aow-man/" target="_blank" rel="noopener">Shop AOW Men</a> ·
         <a href="https://urbanemuse.com/product-category/aow-woman/" target="_blank" rel="noopener">Shop AOW Women</a></p>
-      <p class="small" style="opacity:.7">Archival photographs: Ruins of Warsaw, 1945 — public domain via Wikimedia Commons.</p>
+      <p class="small" style="opacity:.7">Archival photographs (public domain, via Wikimedia Commons): Warsaw 1945; Ypres 1919; London 1940 &amp; Poplar 1941 (Imperial War Museums); Nuremberg 1945 (U.S. Dept. of Defense).</p>
     </div>
   </div>
 
@@ -183,22 +183,22 @@ const PALETTE = ['#f2c14e', '#9b7bff', '#e2404f', '#3fd0c9', '#ff8fb1', '#f4f1ea
 // One entry per wave, cycling. print = giclée print page (null if none); shop = the bomber that carries the painting.
 const UM = 'https://urbanemuse.com/product/';
 const MURALS = [
-  { art: 'img/foxglove.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-foxglove.jpg', title: 'Foxglove',
+  { art: 'img/foxglove.jpg', wall: 'img/wall-1.jpg', place: 'Warsaw, 1945', bomber: 'img/bomber-foxglove.jpg', title: 'Foxglove',
     meta: 'Chris Smith · Oil on canvas', print: null,
     shop: UM + 'foxglove-mid-lightweight-bomber/', product: 'Foxgloves Mid-Lightweight Bomber' },
-  { art: 'img/lion.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-lion.jpg', title: 'Lion Face',
+  { art: 'img/lion.jpg', wall: 'img/wall-ypres.jpg', place: 'Ypres, 1919', bomber: 'img/bomber-lion.jpg', title: 'Lion Face',
     meta: 'Chris Smith · Oil on canvas · 30 × 24 in', print: UM + 'lion-face-giclee-print/',
     shop: UM + 'lion-print-bomber-jacket/', product: 'Lion Print Lightweight Bomber' },
-  { art: 'img/untitled.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-untitled.jpg', title: 'Untitled',
+  { art: 'img/untitled.jpg', wall: 'img/wall-2.jpg', place: 'Warsaw, 1945', bomber: 'img/bomber-untitled.jpg', title: 'Untitled',
     meta: 'Chris Smith · Oil on linen · 48 × 72 in', print: null,
     shop: UM + 'untitled-bomber-jacket/', product: 'Untitled Printed Bomber Jacket' },
-  { art: 'img/nostalgia.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-nostalgia.jpg', title: 'Nostalgia Smith',
+  { art: 'img/nostalgia.jpg', wall: 'img/wall-london.jpg', place: 'London, 1940', bomber: 'img/bomber-nostalgia.jpg', title: 'Nostalgia Smith',
     meta: 'Chris Smith · Oil on linen · 72 × 48 in', print: UM + 'nostalgia-smith-print/',
     shop: UM + 'nostalgia-smith-bomber-jacket/', product: 'Nostalgia Smith Printed Bomber' },
-  { art: 'img/shoeshine.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-shoeshine.jpg', title: 'Shoe Shine',
+  { art: 'img/shoeshine.jpg', wall: 'img/wall-poplar.jpg', place: 'Poplar, London, 1941', bomber: 'img/bomber-shoeshine.jpg', title: 'Shoe Shine',
     meta: 'Chris Smith · Painting', print: null,
     shop: UM + 'shoe-shine-print-bomber-jacket/', product: 'Shoe Shine Print Bomber' },
-  { art: 'img/dove.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-dove.jpg', title: 'Dove Study',
+  { art: 'img/dove.jpg', wall: 'img/wall-nuremberg.jpg', place: 'Nuremberg, 1945', bomber: 'img/bomber-dove.jpg', title: 'Dove Study',
     meta: 'Chris Smith · Graphite on paper · 24 × 18 in', print: UM + 'dove-sketch-giclee-print/',
     shop: UM + 'dove-mid-lightweight-bomber/', product: 'Dove Mid-Lightweight Bomber' }
 ];
@@ -370,6 +370,7 @@ function startWave() {
   spawnT = 1.2;
   popText(W / 2, H * 0.42, 'WAVE ' + wave, '#f4f1ea', 26, 1.6);
   popText(W / 2, H * 0.42 + 30, 'Revealing “' + mural.title + '”', '#f2c14e', 14, 1.6);
+  popText(W / 2, H * 0.42 + 52, 'over the ruins of ' + mural.place, '#a9a49a', 12, 1.6);
 }
 
 function spawn(type) {
@@ -821,7 +822,7 @@ function showMural() {
   state = 'mural';
   $('mEyebrow').textContent = 'Mural complete · Wave ' + wave;
   $('mTitle').textContent = mural.title;
-  $('mMeta').textContent = mural.meta;
+  $('mMeta').innerHTML = mural.meta + '<br>Painted over the ruins of ' + mural.place;
   $('mArt').src = mural.art; $('mBomber').src = mural.bomber;
   $('mBomberLink').href = mural.shop; $('mShop').href = mural.shop;
   $('mArtLink').href = mural.print || mural.shop;
