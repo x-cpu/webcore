@@ -284,7 +284,10 @@ const wallC = mk(W * RS, H * RS), wctx = wallC.getContext('2d');
 const revC = mk(W * RS, H * RS), rctx = revC.getContext('2d');
 let mural = null, artImg = null, cells = [];
 function prepMural(i) {
-  mural = MURALS[i % MURALS.length];
+  // Paintings cycle every N waves; war scenes shift by one each loop,
+  // so all N×N painting/scene pairings appear before anything repeats.
+  const n = MURALS.length, loop = Math.floor(i / n), scene = MURALS[(i % n + loop) % n];
+  mural = Object.assign({}, MURALS[i % n], { wall: scene.wall, place: scene.place });
   artImg = IMG[mural.art];
   const wall = IMG[mural.wall];
   wctx.setTransform(RS, 0, 0, RS, 0, 0);
