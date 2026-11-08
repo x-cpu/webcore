@@ -64,6 +64,7 @@
   .row{display:flex;gap:calc(var(--u)*10);flex-wrap:wrap;justify-content:center}
   .small{font-size:calc(var(--u)*11);color:var(--muted);line-height:1.5;max-width:calc(var(--u)*340)}
   .small a{color:var(--ink)}
+  .home{display:inline-block;padding:calc(var(--u)*8) calc(var(--u)*12);font-size:calc(var(--u)*12);letter-spacing:.06em;color:var(--ink);text-decoration:none}
   .quote{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:calc(var(--u)*17);
     color:var(--ink);max-width:calc(var(--u)*320);line-height:1.3}
   .best{font-size:calc(var(--u)*12);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
@@ -90,6 +91,9 @@
   <canvas id="c"></canvas>
 
   <div class="hudbtns hidden" id="hudbtns">
+    <button class="ib" id="musicBtn" aria-label="Music on/off" title="Music on/off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="musicIcon"></svg>
+    </button>
     <button class="ib" id="muteBtn" aria-label="Sound on/off">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="muteIcon"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
     </button>
@@ -114,6 +118,7 @@
       <p class="best" id="bestStart"></p>
       <p class="small">“Expression is the ultimate counter-perspective to conflict.”<br>
         <a href="https://urbanemuse.com/the-philosophy-of-art-over-war/" target="_blank" rel="noopener">The philosophy of Art Over War →</a></p>
+      <a class="home" href="https://urbanemuse.com/">← Urbane Muse</a>
     </div>
   </div>
 
@@ -144,6 +149,7 @@
         <button class="btn" id="resumeBtn">Resume</button>
         <button class="btn ghost" id="quitBtn">Restart</button>
       </div>
+      <a class="home" href="https://urbanemuse.com/">← Urbane Muse</a>
     </div>
   </div>
 
@@ -163,6 +169,7 @@
         <button class="btn" id="againBtn">Play again</button>
         <button class="btn ghost" id="shareBtn">Share</button>
       </div>
+      <a class="home" href="https://urbanemuse.com/">← Urbane Muse</a>
       <p class="small">Art Over War is independent and self-funded. Every piece funds the next collection.<br>
         <a href="https://urbanemuse.com/product-category/aow-man/" target="_blank" rel="noopener">Shop AOW Men</a> ·
         <a href="https://urbanemuse.com/product-category/aow-woman/" target="_blank" rel="noopener">Shop AOW Women</a></p>
@@ -278,6 +285,22 @@ function setMuteIcon() {
     : '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6"/>';
 }
 setMuteIcon();
+
+// Background music. Separate from the sound-effects toggle; plays only during a run.
+let music = null, musicOn = store.get('aow_music', '1') === '1';
+function setMusicIcon() {
+  const note = '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>';
+  $('musicIcon').innerHTML = musicOn ? note : note + '<path d="M3 3l18 18"/>';
+  $('musicBtn').setAttribute('aria-pressed', musicOn ? 'true' : 'false');
+}
+setMusicIcon();
+function syncMusic() {
+  const want = musicOn && !document.hidden && (state === 'play' || state === 'mural');
+  if (want && !music) { music = new Audio('audio/music.mp3'); music.loop = true; }
+  if (!music) return;
+  if (want && music.paused) { const p = music.play(); if (p) p.catch(() => {}); }
+  else if (!want && !music.paused) music.pause();
+}
 
 // ---------- mural layers ----------
 const wallC = mk(W * RS, H * RS), wctx = wallC.getContext('2d');
@@ -819,7 +842,7 @@ function begin() {
   show('startOv', false); show('overOv', false); show('pauseOv', false); show('muralOv', false);
   show('hudbtns', true);
   parts = [];
-  newGame(); state = 'play';
+  newGame(); state = 'play'; syncMusic();
 }
 function showMural() {
   state = 'mural';
@@ -837,10 +860,10 @@ function nextWave() {
   show('muralOv', false); powerups = []; shots = [];
   startWave(); state = 'play';
 }
-function pause() { if (state !== 'play') return; state = 'pause'; show('pauseOv', true); }
-function resume() { if (state !== 'pause') return; state = 'play'; show('pauseOv', false); last = performance.now(); }
+function pause() { if (state !== 'play') return; state = 'pause'; show('pauseOv', true); syncMusic(); }
+function resume() { if (state !== 'pause') return; state = 'play'; show('pauseOv', false); last = performance.now(); syncMusic(); }
 function gameOver() {
-  state = 'over';
+  state = 'over'; syncMusic();
   if (score > best) { best = score; store.set('aow_best', String(best)); }
   $('oScore').textContent = score.toLocaleString();
   $('oArt').textContent = converted;
@@ -864,6 +887,7 @@ $('pauseBtn').onclick = pause;
 $('resumeBtn').onclick = resume;
 $('quitBtn').onclick = begin;
 $('shareBtn').onclick = share;
+$('musicBtn').onclick = () => { musicOn = !musicOn; store.set('aow_music', musicOn ? '1' : '0'); setMusicIcon(); syncMusic(); };
 $('muteBtn').onclick = () => { muted = !muted; store.set('aow_muted', muted ? '1' : '0'); setMuteIcon(); audio(); };
 
 // ---------- input ----------
@@ -889,7 +913,7 @@ window.addEventListener('keyup', e => {
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); syncMusic(); });
 document.addEventListener('gesturestart', e => e.preventDefault());
 
 // ---------- loop ----------
