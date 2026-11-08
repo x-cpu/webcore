@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Art Over War</title>
+<meta name="description" content="War machines are rolling in. Answer with paint. An Urbane Muse · Chris Smith arcade prototype.">
+<meta property="og:title" content="ART OVER WAR — the game">
+<meta property="og:description" content="War machines are rolling in. Answer with paint.">
+<meta property="og:image" content="https://x-cpu.com/artoverwar/img/foxglove.jpg">
+<meta property="og:url" content="https://x-cpu.com/artoverwar/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 28C4 19 2 13 5 8.5 8 4 13 5 16 9.5 19 5 24 4 27 8.5 30 13 28 19 16 28z' fill='%230b0b0d' stroke='%23c98a5e' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0d; --ink:#f4f1ea; --muted:#a9a49a; --gold:#f2c14e; --copper:#c98a5e;
+    --violet:#9b7bff; --red:#e2404f; --card:rgba(12,12,15,.9); --line:rgba(255,255,255,.14);
+    --u:1px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:"Space Grotesk",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+  body{display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 40%,#1a1820 0%,#0b0b0d 70%)}
+  #stage{position:relative;overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.8);background:#000}
+  canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+  .hudbtns{position:absolute;top:calc(var(--u)*12);right:calc(var(--u)*12);display:flex;gap:calc(var(--u)*8);z-index:3}
+  .ib{width:calc(var(--u)*34);height:calc(var(--u)*34);border-radius:50%;border:1px solid var(--line);
+    background:rgba(0,0,0,.45);color:var(--ink);display:grid;place-items:center;cursor:pointer;
+    font:700 calc(var(--u)*13) "Space Grotesk",sans-serif;backdrop-filter:blur(4px)}
+  .ib svg{width:55%;height:55%}
+  .hidden{display:none!important}
+
+  .ov{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+    padding:calc(var(--u)*22);background:linear-gradient(180deg,rgba(5,5,8,.55),rgba(5,5,8,.85))}
+  .card{width:100%;max-height:100%;overflow:auto;text-align:center;display:flex;flex-direction:column;
+    align-items:center;gap:calc(var(--u)*12)}
+  .logo{font-family:"Archivo Black",Impact,sans-serif;line-height:.86;letter-spacing:-.01em;
+    font-size:calc(var(--u)*64);color:#fff;text-transform:uppercase;position:relative;
+    background:#000;padding:calc(var(--u)*14) calc(var(--u)*18) calc(var(--u)*10);border-radius:calc(var(--u)*6)}
+  .logo sup{font-family:"Space Grotesk",sans-serif;font-size:calc(var(--u)*12);position:absolute;
+    right:calc(var(--u)*6);bottom:calc(var(--u)*8)}
+  .tag{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:calc(var(--u)*22);color:var(--ink)}
+  .eyebrow{font-size:calc(var(--u)*11);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+  .how{list-style:none;font-size:calc(var(--u)*13);color:var(--muted);line-height:1.5;
+    display:grid;gap:calc(var(--u)*5);text-align:left;max-width:calc(var(--u)*320)}
+  .how li{display:flex;gap:calc(var(--u)*10)}
+  .how b{color:var(--ink);font-weight:500}
+  .how i{font-style:normal;color:var(--gold);flex:none;width:calc(var(--u)*16)}
+  .btn{appearance:none;border:0;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+    justify-content:center;gap:.5em;min-height:calc(var(--u)*46);padding:0 calc(var(--u)*24);border-radius:999px;
+    background:var(--ink);color:#0b0b0d;font:700 calc(var(--u)*14) "Space Grotesk",sans-serif;
+    letter-spacing:.14em;text-transform:uppercase}
+  .btn:active{transform:scale(.97)}
+  .btn[disabled]{opacity:.5}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .row{display:flex;gap:calc(var(--u)*10);flex-wrap:wrap;justify-content:center}
+  .small{font-size:calc(var(--u)*11);color:var(--muted);line-height:1.5;max-width:calc(var(--u)*340)}
+  .small a{color:var(--ink)}
+  .quote{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:calc(var(--u)*17);
+    color:var(--ink);max-width:calc(var(--u)*320);line-height:1.3}
+  .best{font-size:calc(var(--u)*12);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  h2.ttl{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:600;font-size:calc(var(--u)*38);line-height:1}
+  h2.big{font-family:"Archivo Black",sans-serif;font-size:calc(var(--u)*36);line-height:.95;text-transform:uppercase}
+  .meta{font-size:calc(var(--u)*12);color:var(--muted);letter-spacing:.06em}
+  .pair{display:flex;gap:calc(var(--u)*10);width:100%;justify-content:center}
+  .pair figure{flex:1;max-width:calc(var(--u)*165)}
+  .pair img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:calc(var(--u)*6);display:block;
+    border:1px solid var(--line);background:#111}
+  .pair figcaption{font-size:calc(var(--u)*10);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:calc(var(--u)*6)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*8);width:100%;max-width:calc(var(--u)*340)}
+  .stats div{border:1px solid var(--line);border-radius:calc(var(--u)*8);padding:calc(var(--u)*10) calc(var(--u)*4)}
+  .stats b{display:block;font-size:calc(var(--u)*22);font-weight:700}
+  .stats span{font-size:calc(var(--u)*9.5);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #toast{position:absolute;left:50%;bottom:calc(var(--u)*24);transform:translateX(-50%);z-index:9;
+    background:#000;border:1px solid var(--line);padding:calc(var(--u)*10) calc(var(--u)*16);border-radius:999px;
+    font-size:calc(var(--u)*13);opacity:0;transition:opacity .3s;pointer-events:none}
+  #toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="c"></canvas>
+
+  <div class="hudbtns hidden" id="hudbtns">
+    <button class="ib" id="muteBtn" aria-label="Sound on/off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="muteIcon"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
+    </button>
+    <button class="ib" id="pauseBtn" aria-label="Pause">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+    </button>
+  </div>
+
+  <!-- START -->
+  <div class="ov" id="startOv">
+    <div class="card">
+      <p class="eyebrow">Urbane Muse · Chris Smith</p>
+      <div class="logo">ART<br>OVER<br>WAR<sup>®</sup></div>
+      <p class="tag">War machines are rolling in.<br>Answer with paint.</p>
+      <ul class="how">
+        <li><i>01</i><span><b>Drag or move</b> to aim. Your paint fires on its own.</span></li>
+        <li><i>02</i><span><b>Paint a machine completely</b> and it turns into art.</span></li>
+        <li><i>03</i><span>Every machine you transform <b>reveals a Chris Smith painting</b> on the ruins.</span></li>
+        <li><i>04</i><span>Don't let them reach the city. Catch <b>hearts</b>, <b>eagles</b> and <b>gold</b>.</span></li>
+      </ul>
+      <button class="btn" id="playBtn" disabled>Loading…</button>
+      <p class="best" id="bestStart"></p>
+      <p class="small">“Expression is the ultimate counter-perspective to conflict.”<br>
+        <a href="https://urbanemuse.com/the-philosophy-of-art-over-war/" target="_blank" rel="noopener">The philosophy of Art Over War →</a></p>
+    </div>
+  </div>
+
+  <!-- MURAL COMPLETE -->
+  <div class="ov hidden" id="muralOv">
+    <div class="card">
+      <p class="eyebrow" id="mEyebrow">Mural complete</p>
+      <h2 class="ttl" id="mTitle">Foxglove</h2>
+      <p class="meta" id="mMeta">Chris Smith · Oil on canvas</p>
+      <div class="pair">
+        <figure><img id="mArt" alt=""><figcaption>The painting</figcaption></figure>
+        <figure><a id="mBomberLink" href="#" target="_blank" rel="noopener"><img id="mBomber" alt=""></a><figcaption>Worn as art</figcaption></figure>
+      </div>
+      <p class="small" id="mStat"></p>
+      <div class="row">
+        <button class="btn" id="nextBtn">Next wave</button>
+        <a class="btn ghost" id="mShop" href="#" target="_blank" rel="noopener">See the bomber</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAUSE -->
+  <div class="ov hidden" id="pauseOv">
+    <div class="card">
+      <h2 class="big">Paused</h2>
+      <div class="row">
+        <button class="btn" id="resumeBtn">Resume</button>
+        <button class="btn ghost" id="quitBtn">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="ov hidden" id="overOv">
+    <div class="card">
+      <p class="eyebrow">Game over</p>
+      <h2 class="big">The war<br>got through</h2>
+      <p class="quote">But every machine you painted is still art.</p>
+      <div class="stats">
+        <div><b id="oScore">0</b><span>Score</span></div>
+        <div><b id="oArt">0</b><span>Turned to art</span></div>
+        <div><b id="oMurals">0</b><span>Murals</span></div>
+      </div>
+      <p class="best" id="oBest"></p>
+      <div class="row">
+        <button class="btn" id="againBtn">Play again</button>
+        <button class="btn ghost" id="shareBtn">Share</button>
+      </div>
+      <p class="small">Art Over War is independent and self-funded. Every piece funds the next collection.<br>
+        <a href="https://urbanemuse.com/product-category/aow-man/" target="_blank" rel="noopener">Shop AOW Men</a> ·
+        <a href="https://urbanemuse.com/product-category/aow-woman/" target="_blank" rel="noopener">Shop AOW Women</a></p>
+      <p class="small" style="opacity:.7">Archival photographs: Ruins of Warsaw, 1945 — public domain via Wikimedia Commons.</p>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+// ---------- constants ----------
+// field is 420 wide; height follows the device's aspect (fixed for the session) so phones fill edge to edge
+const W = 420, H = Math.round(Math.min(940, Math.max(700, 420 * window.innerHeight / Math.max(1, window.innerWidth)))), CITY = H - 128, PY = H - 66, RS = 2, TAU = Math.PI * 2;
+const PALETTE = ['#f2c14e', '#9b7bff', '#e2404f', '#3fd0c9', '#ff8fb1', '#f4f1ea'];
+const MURALS = [
+  { art: 'img/foxglove.jpg', wall: 'img/wall-1.jpg', bomber: 'img/bomber-foxglove.jpg', title: 'Foxglove',
+    meta: 'Chris Smith · Oil on canvas', shop: 'https://urbanemuse.com/product/foxglove-mid-lightweight-bomber/',
+    product: 'Foxgloves Mid-Lightweight Bomber' },
+  { art: 'img/untitled.jpg', wall: 'img/wall-2.jpg', bomber: 'img/bomber-untitled.jpg', title: 'Untitled',
+    meta: 'Chris Smith · Oil on linen · 48 × 72 in', shop: 'https://urbanemuse.com/product/untitled-bomber-jacket/',
+    product: 'Untitled Printed Bomber Jacket' }
+];
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[(Math.random() * a.length) | 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+function rr(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function cover(img, w, h) {
+  const s = Math.max(w / img.width, h / img.height);
+  return [(w - img.width * s) / 2, (h - img.height * s) / 2, img.width * s, img.height * s];
+}
+function heartPath(c, x, y, s) {
+  c.beginPath();
+  c.moveTo(x, y + s * 0.35);
+  c.bezierCurveTo(x - s * 1.1, y - s * 0.35, x - s * 0.45, y - s * 1.05, x, y - s * 0.45);
+  c.bezierCurveTo(x + s * 0.45, y - s * 1.05, x + s * 1.1, y - s * 0.35, x, y + s * 0.35);
+  c.closePath();
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+// ---------- canvas / layout ----------
+const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+let scale = 1, dpr = 1;
+function resize() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  scale = Math.min(vw / W, vh / H);
+  const sw = Math.floor(W * scale), sh = Math.floor(H * scale);
+  stage.style.width = sw + 'px'; stage.style.height = sh + 'px';
+  stage.style.setProperty('--u', (sw / W) + 'px');
+  dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width = Math.round(sw * dpr); cv.height = Math.round(sh * dpr);
+}
+window.addEventListener('resize', resize); resize();
+
+// ---------- images ----------
+const IMG = {};
+function load(src) {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+
+// ---------- audio ----------
+let AC = null, muted = store.get('aow_muted', '0') === '1';
+function audio() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (AC && AC.state === 'suspended') AC.resume();
+}
+function tone(f, d, type = 'sine', g = 0.06, slide = 0, delay = 0) {
+  if (muted || !AC) return;
+  const t = AC.currentTime + delay, o = AC.createOscillator(), gn = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + d);
+  gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(g, t + 0.012);
+  gn.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(gn).connect(AC.destination); o.start(t); o.stop(t + d + 0.03);
+}
+const SFX = {
+  hit: () => tone(rnd(260, 380), 0.06, 'square', 0.018, -90),
+  convert: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.28, 'triangle', 0.05, 0, i * 0.055)),
+  hurt: () => tone(140, 0.4, 'sawtooth', 0.07, -80),
+  power: () => [440, 660, 880, 1320].forEach((f, i) => tone(f, 0.16, 'sine', 0.06, 0, i * 0.05)),
+  pop: () => tone(rnd(900, 1300), 0.05, 'sine', 0.03),
+  wave: () => [392, 494, 587, 784, 988].forEach((f, i) => tone(f, 0.6, 'sine', 0.05, 0, i * 0.13))
+};
+function setMuteIcon() {
+  $('muteIcon').innerHTML = muted
+    ? '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/>'
+    : '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6"/>';
+}
+setMuteIcon();
+
+// ---------- mural layers ----------
+const wallC = mk(W * RS, H * RS), wctx = wallC.getContext('2d');
+const revC = mk(W * RS, H * RS), rctx = revC.getContext('2d');
+let mural = null, artImg = null, cells = [];
+function prepMural(i) {
+  mural = MURALS[i % MURALS.length];
+  artImg = IMG[mural.art];
+  const wall = IMG[mural.wall];
+  wctx.setTransform(RS, 0, 0, RS, 0, 0);
+  wctx.fillStyle = '#16161a'; wctx.fillRect(0, 0, W, H);
+  if (wall) { wctx.drawImage(wall, ...cover(wall, W, H)); }
+  wctx.fillStyle = 'rgba(8,8,12,.55)'; wctx.fillRect(0, 0, W, H);
+  const g = wctx.createRadialGradient(W / 2, H * 0.45, H * 0.2, W / 2, H * 0.45, H * 0.75);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.6)');
+  wctx.fillStyle = g; wctx.fillRect(0, 0, W, H);
+  rctx.setTransform(1, 0, 0, 1, 0, 0); rctx.clearRect(0, 0, revC.width, revC.height);
+  // reveal grid
+  cells = [];
+  const cols = 6, rows = 9, cw = W / cols, ch = CITY / rows;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([(c + 0.5) * cw, (r + 0.5) * ch]);
+  for (let k = cells.length - 1; k > 0; k--) { const j = (Math.random() * (k + 1)) | 0; [cells[k], cells[j]] = [cells[j], cells[k]]; }
+}
+function blob(c, cx, cy, r) {
+  c.beginPath();
+  c.moveTo(cx + r * 0.72, cy); c.arc(cx, cy, r * 0.72, 0, TAU);
+  const n = 7 + ((Math.random() * 5) | 0);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * TAU, d = r * rnd(0.35, 0.85), rr2 = r * rnd(0.18, 0.38);
+    const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+    c.moveTo(x + rr2, y); c.arc(x, y, rr2, 0, TAU);
+  }
+  for (let i = 0; i < 2; i++) { // drips
+    const x = cx + rnd(-r * 0.5, r * 0.5), len = r * rnd(0.6, 1.4), w = r * rnd(0.07, 0.12);
+    c.rect(x - w, cy, w * 2, len); c.moveTo(x + w * 1.4, cy + len); c.arc(x, cy + len, w * 1.4, 0, TAU);
+  }
+}
+function revealAt(x, y, r) {
+  if (!artImg) return;
+  rctx.save(); rctx.setTransform(RS, 0, 0, RS, 0, 0);
+  blob(rctx, x, y, r); rctx.clip();
+  rctx.drawImage(artImg, ...cover(artImg, W, H));
+  rctx.restore();
+}
+
+// ---------- city ----------
+const buildings = [];
+(function makeCity() {
+  let x = -10;
+  while (x < W + 10) {
+    const w = rnd(34, 64), top = CITY + rnd(-6, 44);
+    const wins = [];
+    for (let wy = top + 10; wy < H - 44; wy += 12) for (let wx = x + 6; wx < x + w - 8; wx += 10) wins.push([wx, wy, Math.random()]);
+    buildings.push({ x, w, top, wins, ant: Math.random() < 0.3 });
+    x += w + rnd(-4, 3);
+  }
+})();
+
+// ---------- state ----------
+let state = 'loading';
+let player = null, enemies = [], shots = [], shells = [], parts = [], powerups = [], queue = [];
+let score, hope, wave, converted, waveConverted, waveTotal, murals, spawnT, combo, lastConv, gameT, shake;
+let ending = 0, revealFade = 0, attractT = 0, best = +store.get('aow_best', '0') || 0;
+const keys = {};
+
+function newGame() {
+  player = { x: W / 2, tx: W / 2, inv: 0, fireT: 0, spread: 0, rapid: 0, ci: 0, bob: 0 };
+  enemies = []; shots = []; shells = []; parts = []; powerups = [];
+  score = 0; hope = 3; wave = 0; converted = 0; murals = 0; combo = 1; lastConv = -9; gameT = 0; shake = 0;
+  startWave();
+}
+function startWave() {
+  wave++;
+  prepMural(wave - 1);
+  ending = 0; revealFade = 0; waveConverted = 0;
+  const n = 10 + wave * 4;
+  queue = [];
+  for (let i = 0; i < n; i++) {
+    const r = Math.random();
+    let t = 'tank';
+    if (wave >= 2 && r < 0.2) t = 'missile';
+    else if (r < 0.58) t = 'drone';
+    queue.push(t);
+  }
+  const heavies = wave >= 3 ? 1 + Math.floor((wave - 3) / 2) : 0;
+  for (let i = 0; i < heavies; i++) queue.splice(((0.4 + 0.5 * (i + 1) / (heavies + 1)) * queue.length) | 0, 0, 'heavy');
+  waveTotal = queue.length;
+  spawnT = 1.2;
+  popText(W / 2, H * 0.42, 'WAVE ' + wave, '#f4f1ea', 26, 1.6);
+  popText(W / 2, H * 0.42 + 30, 'Revealing “' + mural.title + '”', '#f2c14e', 14, 1.6);
+}
+
+function spawn(type) {
+  const sp = 1 + (wave - 1) * 0.09;
+  const e = { type, t: 0, marks: [], flash: 0 };
+  if (type === 'tank') Object.assign(e, { x: rnd(40, W - 40), y: -36, w: 44, h: 54, r: 25, hp: 4, vy: 30 * sp, vx: rnd(-14, 14), fire: rnd(1.4, 3), pts: 100 });
+  if (type === 'heavy') Object.assign(e, { x: rnd(70, W - 70), y: -60, w: 74, h: 88, r: 40, hp: 16, vy: 17 * sp, vx: rnd(-8, 8), fire: 1.5, pts: 500 });
+  if (type === 'drone') Object.assign(e, { x: 0, bx: rnd(60, W - 60), y: -24, r: 17, hp: 2, vy: 52 * sp, amp: rnd(30, 80), ph: rnd(0, TAU), pts: 60 });
+  if (type === 'missile') Object.assign(e, { x: rnd(30, W - 30), y: -40, r: 9, hp: 1, vy: 150 * sp, pts: 40 });
+  e.maxhp = e.hp;
+  enemies.push(e);
+}
+
+function popText(x, y, text, color, size = 15, life = 0.9) {
+  parts.push({ k: 'text', x, y, vx: 0, vy: -24, life, max: life, text, color, size });
+}
+function burst(x, y, n, colors, spd = 160, size = 4, k = 'dot', g = 220) {
+  for (let i = 0; i < n; i++) {
+    if (parts.length > 500) break;
+    const a = Math.random() * TAU, s = rnd(spd * 0.3, spd);
+    parts.push({ k, x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, life: rnd(0.5, 1.1), max: 1.1,
+      size: rnd(size * 0.6, size * 1.3), color: pick(colors), rot: rnd(0, TAU), vr: rnd(-6, 6), g });
+  }
+}
+
+function convert(e) {
+  const now = gameT;
+  combo = now - lastConv < 1.6 ? Math.min(combo + 1, 8) : 1;
+  lastConv = now;
+  const pts = e.pts * combo;
+  score += pts; converted++; waveConverted++;
+  const cols = e.marks.length ? e.marks.map(m => m.c) : PALETTE;
+  burst(e.x, e.y, e.type === 'heavy' ? 46 : 22, cols, e.type === 'heavy' ? 260 : 190, 5, 'petal', 120);
+  parts.push({ k: 'flower', x: e.x, y: e.y, vx: 0, vy: -30, life: 1.5, max: 1.5, size: e.r * 1.15, color: pick(cols), c2: pick(PALETTE) });
+  parts.push({ k: 'ring', x: e.x, y: e.y, life: 0.5, max: 0.5, size: e.r * 2.6, color: pick(cols) });
+  popText(e.x, e.y - e.r - 6, '+' + pts + (combo > 1 ? '  ×' + combo : ''), combo > 1 ? '#f2c14e' : '#f4f1ea', combo > 1 ? 17 : 14);
+  // reveal the mural
+  revealAt(e.x, Math.min(e.y, CITY - 20), e.r * 1.7);
+  const per = Math.ceil(cells.length / waveTotal) + (e.type === 'heavy' ? 2 : 0);
+  for (let i = 0; i < per && cells.length; i++) { const [x, y] = cells.pop(); revealAt(x, y, rnd(54, 66)); }
+  SFX.convert();
+  // drops
+  const chance = e.type === 'heavy' ? 1 : 0.1;
+  if (Math.random() < chance) {
+    const types = hope < 3 ? ['heart', 'heart', 'eagle', 'gold'] : ['heart', 'eagle', 'eagle', 'gold', 'gold'];
+    powerups.push({ x: e.x, y: e.y, type: pick(types), t: 0 });
+  }
+}
+
+function hurt(x, y) {
+  hope--; shake = 0.35; player.inv = 1.6;
+  SFX.hurt();
+  burst(x, y, 18, ['#6b6f76', '#3b3e44', '#9a9ea5'], 140, 4, 'dot', 260);
+  if (hope <= 0) gameOver();
+}
+
+// ---------- update ----------
+function update(dt) {
+  gameT += dt;
+  if (shake > 0) shake -= dt;
+
+  // player movement
+  const spd = 520;
+  if (keys.left) player.tx = player.x - 60;
+  if (keys.right) player.tx = player.x + 60;
+  player.tx = clamp(player.tx, 20, W - 20);
+  const dx = player.tx - player.x;
+  player.x += clamp(dx, -spd * dt, spd * dt);
+  player.bob += dt * (Math.abs(dx) > 2 ? 14 : 3);
+  if (player.inv > 0) player.inv -= dt;
+  if (player.spread > 0) player.spread -= dt;
+  if (player.rapid > 0) player.rapid -= dt;
+
+  // fire
+  if (!ending) {
+    player.fireT -= dt;
+    if (player.fireT <= 0) {
+      player.fireT = player.rapid > 0 ? 0.075 : 0.15;
+      const c = PALETTE[player.ci++ % PALETTE.length];
+      const sx = player.x + 9, sy = PY - 36;
+      shots.push({ x: sx, y: sy, vx: 0, vy: -580, c, r: 5 });
+      if (player.spread > 0) {
+        shots.push({ x: sx, y: sy, vx: -130, vy: -560, c: PALETTE[(player.ci + 2) % 6], r: 5 });
+        shots.push({ x: sx, y: sy, vx: 130, vy: -560, c: PALETTE[(player.ci + 4) % 6], r: 5 });
+      }
+    }
+  }
+
+  // spawn
+  if (!ending && queue.length) {
+    spawnT -= dt;
+    const maxOn = 5 + wave;
+    if (spawnT <= 0 && enemies.length < maxOn) {
+      spawn(queue.shift());
+      spawnT = Math.max(0.42, 1.55 - wave * 0.11) * rnd(0.7, 1.3);
+    }
+  }
+
+  // shots
+  for (const s of shots) { s.x += s.vx * dt; s.y += s.vy * dt; }
+  shots = shots.filter(s => s.y > -20 && s.x > -20 && s.x < W + 20 && !s.dead);
+
+  // enemies
+  const sp = 1 + (wave - 1) * 0.09;
+  for (const e of enemies) {
+    e.t += dt; if (e.flash > 0) e.flash -= dt;
+    if (e.type === 'drone') { e.y += e.vy * dt; e.x = e.bx + Math.sin(e.t * 2.2 + e.ph) * e.amp; }
+    else {
+      e.y += e.vy * dt; if (e.vx) { e.x += e.vx * dt; if (e.x < e.r || e.x > W - e.r) e.vx *= -1; }
+    }
+    if ((e.type === 'tank' || e.type === 'heavy') && e.y > 30 && e.y < CITY - 140) {
+      e.fire -= dt;
+      if (e.fire <= 0) {
+        e.fire = e.type === 'heavy' ? rnd(1.3, 2) : rnd(2.2, 3.8) / Math.min(sp, 1.6);
+        const ax = player.x - e.x, ay = PY - e.y, d = Math.hypot(ax, ay) || 1, v = 140 * Math.min(sp, 1.7);
+        const bx = e.x, by = e.y + e.h * 0.5;
+        if (e.type === 'heavy') {
+          for (const off of [-0.22, 0, 0.22]) {
+            const a = Math.atan2(ay, ax) + off; shells.push({ x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 5 });
+          }
+        } else shells.push({ x: bx, y: by, vx: ax / d * v, vy: ay / d * v, r: 4.5 });
+      }
+    }
+    // hits
+    for (const s of shots) {
+      if (s.dead) continue;
+      if (Math.hypot(s.x - e.x, s.y - e.y) < e.r + s.r) {
+        s.dead = true; e.hp--; e.flash = 0.06;
+        if (e.marks.length < 22) e.marks.push({ x: clamp(s.x - e.x, -e.r * 0.8, e.r * 0.8) + rnd(-4, 4), y: rnd(-e.r * 0.8, e.r * 0.8), r: rnd(4, 8) * (e.r / 25), c: s.c });
+        burst(s.x, s.y, 5, [s.c], 90, 3, 'dot', 300);
+        SFX.hit();
+        if (e.hp <= 0) { e.dead = true; convert(e); break; }
+      }
+    }
+    if (!e.dead && e.y > CITY + 6) { e.dead = true; hurt(e.x, CITY + 10); }
+  }
+  enemies = enemies.filter(e => !e.dead);
+
+  // shells
+  for (const b of shells) {
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    for (const s of shots) {
+      if (!s.dead && Math.hypot(s.x - b.x, s.y - b.y) < b.r + s.r + 2) {
+        s.dead = true; b.dead = true; score += 10; SFX.pop();
+        burst(b.x, b.y, 7, [s.c, '#f4f1ea'], 110, 3, 'petal', 140); break;
+      }
+    }
+    if (!b.dead && player.inv <= 0 && Math.hypot(b.x - player.x, b.y - (PY - 16)) < 18) { b.dead = true; hurt(player.x, PY - 16); }
+    if (b.y > H + 10 || b.x < -10 || b.x > W + 10) b.dead = true;
+  }
+  shells = shells.filter(b => !b.dead);
+
+  // powerups
+  for (const p of powerups) {
+    p.t += dt; p.y += 85 * dt; p.x += Math.sin(p.t * 3) * 20 * dt;
+    if (Math.hypot(p.x - player.x, p.y - (PY - 16)) < 32) {
+      p.dead = true; SFX.power();
+      if (p.type === 'heart') { hope = Math.min(5, hope + 1); popText(p.x, p.y - 20, '+1 HEART', '#c98a5e', 15); }
+      if (p.type === 'eagle') { player.spread = 9; popText(p.x, p.y - 20, 'EAGLE SPREAD', '#f2c14e', 15); }
+      if (p.type === 'gold') { player.rapid = 9; popText(p.x, p.y - 20, 'GOLD RUSH', '#f2c14e', 15); }
+    }
+    if (p.y > H + 20) p.dead = true;
+  }
+  powerups = powerups.filter(p => !p.dead);
+
+  updateParts(dt);
+
+  // wave end
+  if (!ending && !queue.length && !enemies.length) {
+    ending = 0.0001;
+    for (const b of shells) burst(b.x, b.y, 5, PALETTE, 90, 3, 'petal', 120);
+    shells = [];
+    SFX.wave();
+    popText(W / 2, H * 0.4, 'MURAL COMPLETE', '#f4f1ea', 24, 2);
+  }
+  if (ending) {
+    ending += dt;
+    revealFade = clamp(ending / 1.8, 0, 1);
+    if (ending > 2.4) {
+      rctx.save(); rctx.setTransform(RS, 0, 0, RS, 0, 0); rctx.drawImage(artImg, ...cover(artImg, W, H)); rctx.restore();
+      revealFade = 0; murals++;
+      showMural();
+    }
+  }
+}
+function updateParts(dt) {
+  for (const p of parts) {
+    p.life -= dt;
+    if (p.k === 'ring') continue;
+    p.x += (p.vx || 0) * dt; p.y += (p.vy || 0) * dt;
+    if (p.g) p.vy += p.g * dt;
+    if (p.vr) p.rot += p.vr * dt;
+    if (p.k === 'dot' || p.k === 'petal') { p.vx *= 0.985; }
+  }
+  parts = parts.filter(p => p.life > 0);
+}
+
+// ---------- draw ----------
+function drawTank(e) {
+  const w = e.w, h = e.h;
+  ctx.save(); ctx.translate(e.x, e.y);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; rr(ctx, -w / 2 + 3, -h / 2 + 5, w, h, 6); ctx.fill();
+  // treads
+  for (const sx of [-1, 1]) {
+    const tx = sx < 0 ? -w / 2 : w / 2 - w * 0.24;
+    ctx.fillStyle = '#26282c'; rr(ctx, tx, -h / 2, w * 0.24, h, 4); ctx.fill();
+    ctx.strokeStyle = '#4a4d53'; ctx.lineWidth = 1.2;
+    const off = (e.t * e.vy * 0.8) % 6;
+    ctx.beginPath();
+    for (let y = -h / 2 + off; y < h / 2; y += 6) { ctx.moveTo(tx + 2, y); ctx.lineTo(tx + w * 0.24 - 2, y); }
+    ctx.stroke();
+  }
+  // hull
+  const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+  g.addColorStop(0, '#7a7f87'); g.addColorStop(1, '#4b4f56');
+  ctx.fillStyle = g; rr(ctx, -w * 0.34, -h * 0.42, w * 0.68, h * 0.84, 5); ctx.fill();
+  ctx.strokeStyle = '#121316'; ctx.lineWidth = 1.6; ctx.stroke();
+  if (e.type === 'heavy') { ctx.fillStyle = '#5b6067'; rr(ctx, -w * 0.26, -h * 0.36, w * 0.52, h * 0.16, 3); ctx.fill(); ctx.stroke(); }
+  // barrel(s)
+  ctx.fillStyle = '#34373c';
+  if (e.type === 'heavy') { ctx.fillRect(-9, 0, 6, h * 0.6); ctx.fillRect(3, 0, 6, h * 0.6); }
+  else ctx.fillRect(-3, 0, 6, h * 0.58);
+  // turret
+  ctx.beginPath(); ctx.arc(0, -h * 0.02, w * 0.21, 0, TAU);
+  ctx.fillStyle = '#62676e'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-w * 0.06, -h * 0.07, w * 0.06, 0, TAU); ctx.fillStyle = '#2b2d31'; ctx.fill();
+  drawMarks(e);
+  if (e.flash > 0) { ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff'; rr(ctx, -w / 2, -h / 2, w, h, 6); ctx.fill(); ctx.globalAlpha = 1; }
+  ctx.restore();
+}
+function drawDrone(e) {
+  ctx.save(); ctx.translate(e.x, e.y);
+  ctx.strokeStyle = '#2a2c30'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-14, -14); ctx.lineTo(14, 14); ctx.moveTo(14, -14); ctx.lineTo(-14, 14); ctx.stroke();
+  for (const [x, y] of [[-14, -14], [14, -14], [-14, 14], [14, 14]]) {
+    ctx.beginPath(); ctx.ellipse(x, y, 9, 2.4 + Math.abs(Math.sin(e.t * 40 + x)) * 2.5, e.t * 30, 0, TAU);
+    ctx.fillStyle = 'rgba(170,175,182,.55)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 2.2, 0, TAU); ctx.fillStyle = '#1b1c1f'; ctx.fill();
+  }
+  ctx.beginPath(); rr(ctx, -9, -8, 18, 16, 5); ctx.fillStyle = '#6c7178'; ctx.fill();
+  ctx.strokeStyle = '#121316'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 4, 2.6, 0, TAU);
+  ctx.fillStyle = Math.sin(e.t * 9) > 0 ? '#ff3b3b' : '#5a1414'; ctx.fill();
+  drawMarks(e);
+  if (e.flash > 0) { ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
+  ctx.restore();
+}
+function drawMissile(e) {
+  ctx.save(); ctx.translate(e.x, e.y);
+  // exhaust (top, since it flies downward)
+  const fl = 10 + Math.random() * 10;
+  const g = ctx.createLinearGradient(0, -18 - fl, 0, -16);
+  g.addColorStop(0, 'rgba(255,140,40,0)'); g.addColorStop(1, 'rgba(255,200,90,.9)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-4, -16); ctx.lineTo(0, -16 - fl); ctx.lineTo(4, -16); ctx.fill();
+  ctx.fillStyle = '#3a3d42';
+  ctx.beginPath(); ctx.moveTo(-5, -16); ctx.lineTo(-10, -20); ctx.lineTo(-5, -9); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(5, -16); ctx.lineTo(10, -20); ctx.lineTo(5, -9); ctx.fill();
+  ctx.fillStyle = '#80858c'; rr(ctx, -5, -17, 10, 26, 3); ctx.fill();
+  ctx.strokeStyle = '#121316'; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-5, 8); ctx.lineTo(0, 18); ctx.lineTo(5, 8); ctx.closePath();
+  ctx.fillStyle = '#9b2a2a'; ctx.fill(); ctx.stroke();
+  drawMarks(e);
+  ctx.restore();
+}
+function drawMarks(e) {
+  for (const m of e.marks) {
+    ctx.fillStyle = m.c; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(m.x + m.r * 0.7, m.y + m.r * 0.5, m.r * 0.45, 0, TAU); ctx.fill();
+  }
+  // paint progress ring
+  if (e.hp < e.maxhp) {
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, e.r + 6, -Math.PI / 2, -Math.PI / 2 + TAU * (1 - e.hp / e.maxhp)); ctx.stroke();
+  }
+}
+function drawPlayer() {
+  const x = player.x, y = PY;
+  if (player.inv > 0 && Math.floor(player.inv * 12) % 2 === 0) return;
+  ctx.save(); ctx.translate(x, y);
+  const b = Math.sin(player.bob) * 1.5;
+  ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.ellipse(0, 26, 18, 5, 0, 0, TAU); ctx.fill();
+  // legs
+  ctx.strokeStyle = '#1c1c20'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-5, 10); ctx.lineTo(-6 + b, 24); ctx.moveTo(5, 10); ctx.lineTo(6 - b, 24); ctx.stroke();
+  // sneakers
+  ctx.fillStyle = '#f4f1ea'; rr(ctx, -12 + b, 22, 9, 5, 2); ctx.fill(); rr(ctx, 3 - b, 22, 9, 5, 2); ctx.fill();
+  // hoodie body
+  ctx.fillStyle = '#0e0e10'; ctx.strokeStyle = '#3a3a40'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(-12, -12); ctx.lineTo(12, -12); ctx.lineTo(14, 12); ctx.lineTo(-14, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // AOW stack on chest
+  ctx.fillStyle = '#f4f1ea'; ctx.font = '700 4.2px "Archivo Black", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('ART', 0, -4); ctx.fillText('OVER', 0, 0.6); ctx.fillText('WAR', 0, 5.2);
+  // arm + can
+  ctx.strokeStyle = '#0e0e10'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(9, -9); ctx.lineTo(10, -26); ctx.stroke();
+  ctx.fillStyle = '#d8d6d0'; rr(ctx, 6, -40, 8, 14, 2); ctx.fill();
+  ctx.fillStyle = PALETTE[(player.ci + 5) % PALETTE.length]; ctx.fillRect(7, -43, 6, 4);
+  // head + hood
+  ctx.fillStyle = '#0e0e10'; ctx.beginPath(); ctx.arc(0, -20, 9.5, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7a4a32'; ctx.beginPath(); ctx.arc(0, -19, 6, 0, TAU); ctx.fill();
+  ctx.restore();
+  // power aura
+  if (player.spread > 0 || player.rapid > 0) {
+    ctx.strokeStyle = 'rgba(242,193,78,' + (0.35 + Math.sin(gameT * 8) * 0.2) + ')'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y - 6, 30, 0, TAU); ctx.stroke();
+  }
+}
+function drawPowerup(p) {
+  ctx.save(); ctx.translate(p.x, p.y);
+  const s = 1 + Math.sin(p.t * 6) * 0.08; ctx.scale(s, s);
+  ctx.beginPath(); ctx.arc(0, 0, 17, 0, TAU); ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(242,193,78,.8)'; ctx.lineWidth = 1.5; ctx.stroke();
+  if (p.type === 'heart') {
+    heartPath(ctx, 0, 2, 11); ctx.fillStyle = '#0b0b0d'; ctx.fill(); ctx.strokeStyle = '#c98a5e'; ctx.lineWidth = 2; ctx.stroke();
+  } else if (p.type === 'eagle') {
+    ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(-11, -4); ctx.quadraticCurveTo(-5, -2, 0, 5); ctx.quadraticCurveTo(5, -2, 11, -4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-8, 2); ctx.quadraticCurveTo(-4, 2, 0, 5); ctx.quadraticCurveTo(4, 2, 8, 2); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#f2c14e'; ctx.beginPath(); ctx.moveTo(0, -10); ctx.bezierCurveTo(7, -1, 8, 4, 0, 9); ctx.bezierCurveTo(-8, 4, -7, -1, 0, -10); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawCity(progress) {
+  const lit = 0.06 + progress * 0.85;
+  for (const b of buildings) {
+    ctx.fillStyle = '#0d0d10'; ctx.fillRect(b.x, b.top, b.w, H - b.top);
+    if (b.ant) { ctx.fillRect(b.x + b.w / 2 - 1, b.top - 14, 2, 14); }
+    for (const [wx, wy, k] of b.wins) {
+      ctx.fillStyle = k < lit ? (k < lit * 0.35 ? '#f2c14e' : 'rgba(242,193,78,.55)') : '#1a1a1f';
+      ctx.fillRect(wx, wy, 4, 6);
+    }
+  }
+  ctx.fillStyle = '#08080a'; ctx.fillRect(0, H - 40, W, 40);
+  ctx.fillStyle = 'rgba(255,255,255,.08)';
+  for (let x = ((gameT * 0) % 40); x < W; x += 40) ctx.fillRect(x, H - 21, 20, 2);
+  // danger line
+  let near = 0;
+  for (const e of enemies) near = Math.max(near, 1 - clamp((CITY - e.y) / 120, 0, 1));
+  ctx.strokeStyle = `rgba(226,64,79,${0.12 + near * (0.5 + Math.sin(gameT * 12) * 0.3)})`;
+  ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(0, CITY); ctx.lineTo(W, CITY); ctx.stroke(); ctx.setLineDash([]);
+}
+function drawParts() {
+  for (const p of parts) {
+    const a = clamp(p.life / p.max, 0, 1);
+    ctx.globalAlpha = a;
+    if (p.k === 'dot') { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill(); }
+    else if (p.k === 'petal') {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.ellipse(0, 0, p.size * 1.3, p.size * 0.6, 0, 0, TAU); ctx.fill(); ctx.restore();
+    } else if (p.k === 'ring') {
+      const t = 1 - a; ctx.strokeStyle = p.color; ctx.lineWidth = 3 * a + 0.5;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.3 + t * 0.7), 0, TAU); ctx.stroke();
+    } else if (p.k === 'flower') {
+      const t = 1 - a, s = p.size * Math.min(1, t * 4);
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(t * 1.4);
+      ctx.fillStyle = p.color;
+      for (let i = 0; i < 6; i++) { ctx.rotate(TAU / 6); ctx.beginPath(); ctx.ellipse(0, -s * 0.55, s * 0.28, s * 0.5, 0, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = p.c2; ctx.beginPath(); ctx.arc(0, 0, s * 0.22, 0, TAU); ctx.fill();
+      ctx.restore();
+    } else if (p.k === 'text') {
+      ctx.fillStyle = p.color; ctx.font = `700 ${p.size}px "Space Grotesk", sans-serif`; ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
+      ctx.fillText(p.text, p.x, p.y); ctx.shadowBlur = 0;
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+function drawHUD() {
+  const g = ctx.createLinearGradient(0, 0, 0, 90);
+  g.addColorStop(0, 'rgba(0,0,0,.75)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 90);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#f4f1ea';
+  ctx.font = '700 18px "Space Grotesk", sans-serif'; ctx.fillText(score.toLocaleString(), 14, 30);
+  ctx.font = '500 9px "Space Grotesk", sans-serif'; ctx.fillStyle = '#a9a49a'; ctx.fillText('SCORE', 14, 14);
+  for (let i = 0; i < Math.max(3, hope); i++) {
+    heartPath(ctx, 22 + i * 20, 46, 7.5);
+    ctx.fillStyle = i < hope ? '#0b0b0d' : 'rgba(0,0,0,0)'; ctx.fill();
+    ctx.strokeStyle = i < hope ? '#c98a5e' : 'rgba(201,138,94,.35)'; ctx.lineWidth = 1.8; ctx.stroke();
+  }
+  ctx.textAlign = 'center';
+  ctx.font = '500 9px "Space Grotesk", sans-serif'; ctx.fillStyle = '#a9a49a'; ctx.fillText('WAVE ' + wave, W / 2, 14);
+  ctx.font = 'italic 600 19px "Cormorant Garamond", serif'; ctx.fillStyle = '#f4f1ea'; ctx.fillText(mural.title, W / 2, 32);
+  // mural progress
+  const prog = waveTotal ? waveConverted / waveTotal : 0;
+  ctx.fillStyle = 'rgba(255,255,255,.14)'; rr(ctx, 14, 62, W - 28, 4, 2); ctx.fill();
+  const pg = ctx.createLinearGradient(14, 0, W - 14, 0);
+  pg.addColorStop(0, '#f2c14e'); pg.addColorStop(0.5, '#e2404f'); pg.addColorStop(1, '#9b7bff');
+  ctx.fillStyle = pg; rr(ctx, 14, 62, Math.max(4, (W - 28) * prog), 4, 2); ctx.fill();
+  ctx.textAlign = 'right'; ctx.font = '500 9px "Space Grotesk", sans-serif'; ctx.fillStyle = '#a9a49a';
+  ctx.fillText('MURAL ' + Math.round(prog * 100) + '%', W - 14, 78);
+  ctx.textAlign = 'left';
+  let cx = 14;
+  if (player.spread > 0) { ctx.fillStyle = '#f2c14e'; ctx.fillText('EAGLE ' + Math.ceil(player.spread) + 's', cx, 78); cx += 64; }
+  if (player.rapid > 0) { ctx.fillStyle = '#f2c14e'; ctx.fillText('GOLD ' + Math.ceil(player.rapid) + 's', cx, 78); }
+  if (combo > 1 && gameT - lastConv < 1.6) {
+    ctx.textAlign = 'center'; ctx.font = '700 14px "Space Grotesk", sans-serif'; ctx.fillStyle = '#f2c14e';
+    ctx.fillText('COMBO ×' + combo, W / 2, 100);
+  }
+}
+
+function render() {
+  ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  ctx.save();
+  if (shake > 0) ctx.translate(rnd(-5, 5) * shake * 2, rnd(-5, 5) * shake * 2);
+  ctx.drawImage(wallC, 0, 0, W, H);
+  ctx.drawImage(revC, 0, 0, W, H);
+  if (revealFade > 0 && artImg) { ctx.globalAlpha = revealFade; ctx.drawImage(artImg, ...cover(artImg, W, H)); ctx.globalAlpha = 1; }
+  const inGame = state === 'play' || state === 'pause' || state === 'mural' || state === 'over';
+  drawCity(inGame && waveTotal ? waveConverted / waveTotal : 0.25);
+  if (inGame) {
+    for (const p of powerups) drawPowerup(p);
+    for (const e of enemies) e.type === 'drone' ? drawDrone(e) : e.type === 'missile' ? drawMissile(e) : drawTank(e);
+    for (const b of shells) {
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, TAU); ctx.fillStyle = '#2b2d31'; ctx.fill();
+      ctx.strokeStyle = '#e2404f'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    for (const s of shots) {
+      ctx.fillStyle = s.c; ctx.beginPath(); ctx.ellipse(s.x, s.y, s.r * 0.8, s.r * 1.4, 0, 0, TAU); ctx.fill();
+    }
+    drawPlayer();
+  }
+  drawParts();
+  ctx.restore();
+  if (inGame && state !== 'over') drawHUD();
+}
+
+// ---------- attract mode (behind the start screen) ----------
+function attract(dt) {
+  attractT -= dt; gameT += dt;
+  if (attractT <= 0 && cells.length > 12) {
+    attractT = 0.55;
+    const [x, y] = cells.pop(); revealAt(x, y, rnd(50, 70));
+    burst(x, y, 10, PALETTE, 120, 4, 'petal', 100);
+  }
+  updateParts(dt);
+}
+
+// ---------- screens ----------
+const show = (id, on) => $(id).classList.toggle('hidden', !on);
+function begin() {
+  audio();
+  show('startOv', false); show('overOv', false); show('pauseOv', false); show('muralOv', false);
+  show('hudbtns', true);
+  parts = [];
+  newGame(); state = 'play';
+}
+function showMural() {
+  state = 'mural';
+  $('mEyebrow').textContent = 'Mural complete · Wave ' + wave;
+  $('mTitle').textContent = mural.title;
+  $('mMeta').textContent = mural.meta;
+  $('mArt').src = mural.art; $('mBomber').src = mural.bomber;
+  $('mBomberLink').href = mural.shop; $('mShop').href = mural.shop;
+  $('mShop').textContent = 'See the bomber';
+  $('mStat').textContent = waveConverted + ' war machines turned to art. Chris Smith’s painting also lives on the ' + mural.product + '.';
+  show('muralOv', true);
+}
+function nextWave() {
+  show('muralOv', false); powerups = []; shots = [];
+  startWave(); state = 'play';
+}
+function pause() { if (state !== 'play') return; state = 'pause'; show('pauseOv', true); }
+function resume() { if (state !== 'pause') return; state = 'play'; show('pauseOv', false); last = performance.now(); }
+function gameOver() {
+  state = 'over';
+  if (score > best) { best = score; store.set('aow_best', String(best)); }
+  $('oScore').textContent = score.toLocaleString();
+  $('oArt').textContent = converted;
+  $('oMurals').textContent = murals;
+  $('oBest').textContent = 'Best ' + best.toLocaleString();
+  setTimeout(() => { show('hudbtns', false); show('overOv', true); }, 900);
+}
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2200); }
+async function share() {
+  const url = location.origin + location.pathname;
+  const text = `I turned ${converted} war machines into art in ART OVER WAR and scored ${score.toLocaleString()}. Can you beat it?`;
+  if (navigator.share) { try { await navigator.share({ title: 'ART OVER WAR', text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text + ' ' + url); toast('Link copied — paste it anywhere'); }
+  catch (e) { toast(url); }
+}
+
+$('playBtn').onclick = begin;
+$('againBtn').onclick = begin;
+$('nextBtn').onclick = () => { audio(); nextWave(); };
+$('pauseBtn').onclick = pause;
+$('resumeBtn').onclick = resume;
+$('quitBtn').onclick = begin;
+$('shareBtn').onclick = share;
+$('muteBtn').onclick = () => { muted = !muted; store.set('aow_muted', muted ? '1' : '0'); setMuteIcon(); audio(); };
+
+// ---------- input ----------
+let dragging = false;
+function aim(e) {
+  const r = cv.getBoundingClientRect();
+  if (player) player.tx = (e.clientX - r.left) / r.width * W;
+}
+cv.addEventListener('pointerdown', e => { dragging = true; aim(e); audio(); try { cv.setPointerCapture(e.pointerId); } catch (_) {} });
+cv.addEventListener('pointermove', e => { if (dragging || e.pointerType === 'mouse') aim(e); });
+cv.addEventListener('pointerup', () => { dragging = false; });
+cv.addEventListener('pointercancel', () => { dragging = false; });
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { state === 'play' ? pause() : resume(); }
+  if ((e.key === 'Enter' || e.key === ' ') ) {
+    if (state === 'menu' || state === 'over') { e.preventDefault(); begin(); }
+    else if (state === 'mural') { e.preventDefault(); audio(); nextWave(); }
+  }
+});
+window.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+document.addEventListener('gesturestart', e => e.preventDefault());
+
+// ---------- loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (state === 'play') update(dt);
+  else if (state === 'menu') attract(dt);
+  else if (state === 'over' || state === 'mural') { gameT += dt; updateParts(dt); }
+  if (state !== 'loading') render();
+  requestAnimationFrame(frame);
+}
+
+// ---------- boot ----------
+(async () => {
+  const srcs = [...new Set(MURALS.flatMap(m => [m.art, m.wall]))];
+  const imgs = await Promise.all(srcs.map(load));
+  srcs.forEach((s, i) => IMG[s] = imgs[i]);
+  MURALS.forEach(m => { const i = new Image(); i.src = m.bomber; }); // warm cache for the mural card
+  parts = []; gameT = 0; prepMural(0);
+  state = 'menu';
+  const b = $('playBtn'); b.disabled = false; b.textContent = 'Play';
+  if (best) $('bestStart').textContent = 'Best ' + best.toLocaleString();
+  requestAnimationFrame(t => { last = t; frame(t); });
+})();
+})();
+</script>
+</body>
+</html>
