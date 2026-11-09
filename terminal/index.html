@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>x-cpu terminal</title>
+<meta name="description" content="The x-cpu terminal. Browse NeonRelay, x-Cam and LOCI, or just ask a question.">
+<meta name="theme-color" content="#181616">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23181616'/%3E%3Crect x='9' y='9' width='14' height='14' rx='2' fill='none' stroke='%2387a987' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2387a987'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script>
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('xcpu-term-theme'); } catch (e) {}
+  if (t) document.documentElement.dataset.theme = t;
+  try { if (localStorage.getItem('xcpu-term-crt') === 'off') document.documentElement.dataset.crt = 'off'; } catch (e) {}
+})();
+</script>
+<style>
+  /* Kanagawa Dragon is the default theme */
+  :root {
+    --bezel: #0d0c0c; --bg: #181616; --raise: #282727; --line: #393836;
+    --fg: #c5c9c5; --dim: #8e9490; --prompt: #87a987; --accent: #c4b28a;
+    --link: #8ba4b0; --hot: #b6927b; --err: #c4746e; --glow: 5px;
+  }
+  :root[data-theme="kanagawa"] {
+    --bezel: #16161d; --bg: #1f1f28; --raise: #2a2a37; --line: #363646;
+    --fg: #dcd7ba; --dim: #938aa9; --prompt: #98bb6c; --accent: #e6c384;
+    --link: #7e9cd8; --hot: #ffa066; --err: #e46876; --glow: 6px;
+  }
+  :root[data-theme="x-cpu"] {
+    --bezel: #020305; --bg: #05070a; --raise: #0a0e14; --line: #1c2a24;
+    --fg: #c9f5dd; --dim: #8a97a5; --prompt: #00ff88; --accent: #00ff88;
+    --link: #5b9dff; --hot: #7dffbe; --err: #ff6b6b; --glow: 9px;
+  }
+  :root[data-theme="tokyo-night"] {
+    --bezel: #13141c; --bg: #1a1b26; --raise: #24283b; --line: #2f3549;
+    --fg: #c0caf5; --dim: #9aa5ce; --prompt: #9ece6a; --accent: #bb9af7;
+    --link: #7aa2f7; --hot: #7dcfff; --err: #f7768e; --glow: 7px;
+  }
+  :root[data-theme="gruvbox"] {
+    --bezel: #141617; --bg: #1d2021; --raise: #282828; --line: #3c3836;
+    --fg: #ebdbb2; --dim: #a89984; --prompt: #b8bb26; --accent: #fabd2f;
+    --link: #83a598; --hot: #fe8019; --err: #fb4934; --glow: 7px;
+  }
+  :root[data-theme="dracula"] {
+    --bezel: #1e1f29; --bg: #282a36; --raise: #343746; --line: #44475a;
+    --fg: #f8f8f2; --dim: #a9b3d6; --prompt: #50fa7b; --accent: #bd93f9;
+    --link: #8be9fd; --hot: #ff79c6; --err: #ff5555; --glow: 7px;
+  }
+  :root[data-theme="rose-pine"] {
+    --bezel: #120f1c; --bg: #191724; --raise: #26233a; --line: #403d52;
+    --fg: #e0def4; --dim: #908caa; --prompt: #9ccfd8; --accent: #f6c177;
+    --link: #c4a7e7; --hot: #ebbcba; --err: #eb6f92; --glow: 4px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bezel);
+    color: var(--fg);
+    font-family: "JetBrains Mono", "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.55;
+    overflow: hidden;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .crt {
+    position: fixed;
+    inset: clamp(0px, 1.4vw, 18px);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: clamp(0px, 1.4vw, 18px);
+    overflow: hidden;
+  }
+
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--dim);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .bar a { color: inherit; text-decoration: none; }
+  .bar a:hover, .bar a:focus-visible { color: var(--accent); }
+  .bar b { color: var(--prompt); font-weight: 400; }
+
+  #screen {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    scrollbar-color: var(--line) transparent;
+    text-shadow: 0 0 var(--glow) color-mix(in srgb, currentColor 42%, transparent);
+  }
+  :root[data-crt="off"] #screen { text-shadow: none; }
+
+  .line { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .dim { color: var(--dim); }
+  .ok { color: var(--prompt); }
+  .accent { color: var(--accent); }
+  .hot { color: var(--hot); }
+  .err { color: var(--err); }
+  .gap { margin-top: 10px; }
+
+  .logo {
+    color: var(--accent);
+    font-size: clamp(7.5px, 3.3vw, 14px);
+    line-height: 1.12;
+    white-space: pre;
+    margin: 10px 0 12px;
+  }
+
+  button.cmd {
+    all: unset;
+    color: var(--link);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 3px;
+  }
+  button.cmd:hover { color: var(--accent); }
+  button.cmd:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+  .rows { display: grid; grid-template-columns: max-content 1fr; gap: 3px 22px; margin: 8px 0; }
+  .rows > .dim { overflow-wrap: anywhere; }
+
+  .proj {
+    display: grid;
+    grid-template-columns: 13ch 19ch 1fr;
+    gap: 2px 14px;
+    padding: 7px 0;
+    border-top: 1px dashed var(--line);
+  }
+  .proj .runs { grid-column: 3; color: var(--dim); font-size: 13px; }
+
+  form#prompt { display: flex; align-items: baseline; gap: 1ch; margin-top: 10px; }
+  #label { color: var(--prompt); white-space: nowrap; }
+  #input {
+    all: unset;
+    flex: 1;
+    min-width: 0;
+    color: var(--fg);
+    caret-color: var(--accent);
+    caret-shape: block;
+    font-size: 16px;
+    text-shadow: inherit;
+  }
+  #input::placeholder { color: var(--dim); opacity: .75; }
+  form#prompt[hidden] { display: none; }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    padding: 9px 16px calc(9px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button {
+    all: unset;
+    flex: none;
+    padding: 5px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--raise);
+    color: var(--fg);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .chips button:hover { border-color: var(--accent); color: var(--accent); }
+  .chips button:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+  /* CRT layers */
+  .scan, .vig { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  .scan {
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.2) 2px 3px);
+  }
+  .scan::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: -30%;
+    height: 30%;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fg) 4%, transparent), transparent);
+    animation: roll 9s linear infinite;
+  }
+  @keyframes roll { to { transform: translateY(440%); } }
+  .vig { box-shadow: inset 0 0 110px rgba(0,0,0,.5); }
+  :root[data-crt="off"] .scan, :root[data-crt="off"] .vig { display: none; }
+
+  /* Project window */
+  #win { position: absolute; inset: 0; z-index: 10; display: none; flex-direction: column; background: var(--bg); }
+  #win.open { display: flex; }
+  #win header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 16px;
+    background: var(--raise);
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  #win header span { color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #win header div { display: flex; gap: 18px; flex: none; }
+  #win a { color: var(--link); }
+  #win iframe { flex: 1; border: 0; width: 100%; background: #05070a; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+    .proj { grid-template-columns: 1fr; }
+    .proj .runs { grid-column: 1; }
+    .bar .wide { display: none; }
+    .rows { gap: 3px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="crt">
+  <div class="bar">
+    <span><b>&#9632;</b> x-cpu://terminal</span>
+    <span><span class="wide" id="barTheme"></span><span class="wide"> &nbsp;&middot;&nbsp; </span><a href="/">exit to site</a></span>
+  </div>
+
+  <main id="screen">
+    <h1 class="sr">x-cpu terminal</h1>
+    <noscript>
+      <p>The terminal needs JavaScript. Our projects:</p>
+      <p><a href="/neonrelay/">NeonRelay</a>, <a href="/x-cam/">x-Cam</a>, <a href="/loci/">LOCI</a>. Contact: <a href="mailto:info@x-cpu.com">info@x-cpu.com</a></p>
+    </noscript>
+    <div id="log" role="log" aria-live="polite"></div>
+    <form id="prompt" autocomplete="off" hidden>
+      <label id="label" for="input">guest@x-cpu:~$</label>
+      <input id="input" maxlength="300" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
+    </form>
+  </main>
+
+  <nav class="chips" id="chips" aria-label="Suggested commands"></nav>
+
+  <div class="scan" aria-hidden="true"></div>
+  <div class="vig" aria-hidden="true"></div>
+
+  <section id="win" aria-label="Project window">
+    <header>
+      <span id="winTitle"></span>
+      <div><a id="winOut" target="_blank" rel="noopener">new tab</a><button class="cmd" id="winClose" type="button">[esc] close</button></div>
+    </header>
+    <iframe id="frame" title="Project page"></iframe>
+  </section>
+</div>
+
+<script>
+(function () {
+  if (window.top !== window.self) return;
+
+  const AI_ENDPOINT = 'https://x-cpu-terminal.x-cpu.workers.dev/chat';
+
+  const params = new URLSearchParams(location.search);
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  const aiUrl = (isLocal && params.get('ai')) || AI_ENDPOINT;
+
+  const PROJECTS = [
+    { id: 'neonrelay', name: 'NeonRelay', tag: 'v0.3.2', desc: 'An IPTV player built for the remote. Bring your own provider and get live TV, a full guide, catch-up, movies and series.', runs: 'Fire TV, Android TV / Google TV', url: '/neonrelay/' },
+    { id: 'x-cam', name: 'x-Cam', tag: 'v1.1 beta', desc: 'Your Reolink cameras on the TV: four live at once, a recording timeline, and a mini player over Netflix. Local network only.', runs: 'Fire TV, Android TV / Google TV', url: '/x-cam/' },
+    { id: 'loci', name: 'LOCI', tag: 'v1.0 experimental', desc: 'A voice assistant that runs entirely on your own computer, with local AI models, local speech and a private second brain.', runs: 'Mac (Apple Silicon), Windows 10 / 11', url: '/loci/' },
+  ];
+  const HIDDEN_PROJECTS = [{ id: 'artoverwar', name: 'Art Over War', url: '/artoverwar/' }];
+  const ALIASES = { xcam: 'x-cam', vega: 'loci', 'art-over-war': 'artoverwar' };
+
+  const THEMES = {
+    dragon: 'kanagawa dragon, dark ink and sage',
+    kanagawa: 'kanagawa wave, indigo and old paper',
+    'x-cpu': 'phosphor green, the classic',
+    'tokyo-night': 'midnight blue',
+    gruvbox: 'warm amber',
+    dracula: 'neon purple',
+    'rose-pine': 'dusk',
+  };
+  const DEFAULT_CHIPS = ['projects', 'about', 'ping', 'theme', 'help'];
+  const SAFE_NEXT = /^(help|projects|about|ping|support|run (neonrelay|x-cam|loci))$/;
+  const DEEP_LINKS = ['projects', 'about', 'ping', 'help'];
+
+  const $ = (id) => document.getElementById(id);
+  const screen_ = $('screen'), log = $('log'), form = $('prompt'), input = $('input'), label = $('label');
+  const chips = $('chips'), win = $('win'), frame = $('frame');
+  const PROMPT = 'guest@x-cpu:~$';
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const coarse = matchMedia('(pointer: coarse)').matches;
+
+  const started = Date.now();
+  let busy = true;
+  let pending = null;
+  let aiNoticeShown = false;
+  const typed = [];
+  let historyIndex = 0;
+  const chat = [];
+
+  function store(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+
+  function scroll() { screen_.scrollTop = screen_.scrollHeight; }
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function add(node) { log.appendChild(node); scroll(); return node; }
+  function print(text, cls) { return add(el('div', 'line' + (cls ? ' ' + cls : ''), text)); }
+
+  function cmdButton(command, text) {
+    const b = el('button', 'cmd', text || command);
+    b.type = 'button';
+    b.addEventListener('click', () => exec(command));
+    return b;
+  }
+
+  function printParts(parts, cls) {
+    const line = el('div', 'line' + (cls ? ' ' + cls : ''));
+    parts.forEach((p) => line.append(p));
+    return add(line);
+  }
+
+  function rows(items) {
+    const box = el('div', 'rows');
+    items.forEach(([left, right]) => { box.append(left, el('span', 'dim', right)); });
+    return add(box);
+  }
+
+  function setChips(list) {
+    chips.textContent = '';
+    list.forEach((c) => {
+      const b = el('button', '', c);
+      b.type = 'button';
+      b.addEventListener('click', () => exec(c));
+      chips.append(b);
+    });
+  }
+
+  function focusInput() { if (!coarse && !form.hidden) input.focus({ preventScroll: true }); }
+
+  function setBusy(on) {
+    busy = on;
+    form.hidden = on;
+    if (!on) { scroll(); focusInput(); }
+  }
+
+  function setLabel(text) { label.textContent = text; }
+
+  function applyTheme(name) {
+    if (name === 'dragon') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = name;
+    $('barTheme').textContent = 'theme: ' + name;
+    document.querySelector('meta[name=theme-color]').content =
+      getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  }
+
+  function currentTheme() { return document.documentElement.dataset.theme || 'dragon'; }
+
+  function findProject(raw) {
+    const key = raw.toLowerCase();
+    const id = ALIASES[key] || key;
+    return PROJECTS.concat(HIDDEN_PROJECTS).find((p) => p.id === id);
+  }
+
+  function openWindow(project) {
+    $('winTitle').textContent = 'x-cpu://' + project.id;
+    $('winOut').href = project.url;
+    frame.src = project.url;
+    win.classList.add('open');
+    $('winClose').focus();
+  }
+
+  function closeWindow() {
+    if (!win.classList.contains('open')) return;
+    win.classList.remove('open');
+    frame.removeAttribute('src');
+    frame.src = 'about:blank';
+    focusInput();
+  }
+
+  frame.addEventListener('load', () => {
+    if (!win.classList.contains('open')) return;
+    let doc;
+    try { doc = frame.contentWindow; doc.location.pathname; } catch (e) { return; }
+    if (/^\/(terminal|projects)\//.test(doc.location.pathname)) {
+      closeWindow();
+      exec('projects');
+      return;
+    }
+    doc.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWindow(); });
+  });
+  $('winClose').addEventListener('click', closeWindow);
+
+  function showHelp() {
+    print('Commands', 'accent gap');
+    const list = [
+      ['projects', 'list what we build'],
+      ['run <name>', 'open a project in this window'],
+      ['about', 'what is x-cpu'],
+      ['ping', 'send us a message'],
+      ['support', 'install help and contact'],
+      ['theme [name]', 'list or change the color theme'],
+      ['crt [on|off]', 'scanlines and glow'],
+      ['history', 'what you have typed'],
+      ['privacy', 'where your questions go'],
+      ['clear', 'wipe the screen'],
+      ['exit', 'back to the main site'],
+    ];
+    rows(list.map(([c, d]) => [cmdButton(c.split(' ')[0], c), d]));
+    print('Or type a question in plain English.', 'dim');
+  }
+
+  function showProjects() {
+    print('Robots in training. Free, closed-source, running on your own hardware.', 'gap accent');
+    const box = el('div', 'gap');
+    PROJECTS.forEach((p) => {
+      const row = el('div', 'proj');
+      const left = el('span');
+      left.append(cmdButton('run ' + p.id, p.id));
+      row.append(left, el('span', 'hot', p.tag), el('span', '', p.desc), el('span', 'runs', p.runs));
+      box.append(row);
+    });
+    add(box);
+    printParts([el('span', 'dim', 'try: '), cmdButton('run ' + PROJECTS[0].id), el('span', 'dim', '  or select a name above')], 'gap');
+    setChips(PROJECTS.map((p) => 'run ' + p.id).concat('help'));
+  }
+
+  function showAbout() {
+    print('x-cpu is a small independent studio at the edge of machines, media and generative systems.', 'gap');
+    print('Human curiosity. Machine precision.', 'accent');
+    print('"Growing up is optional. Upgrading is not." // operating principle 001', 'dim');
+  }
+
+  function showThemes() {
+    print('Themes', 'accent gap');
+    const now = currentTheme();
+    rows(Object.keys(THEMES).map((name) => [cmdButton('theme ' + name, (name === now ? '* ' : '  ') + name), THEMES[name]]));
+    setChips(Object.keys(THEMES).map((t) => 'theme ' + t));
+  }
+
+  function setTheme(name) {
+    const key = name.toLowerCase();
+    if (!THEMES[key]) {
+      print('theme: no such theme: ' + name, 'err');
+      showThemes();
+      return;
+    }
+    applyTheme(key);
+    store('xcpu-term-theme', key);
+    print('> recalibrating phosphors ... ok', 'ok');
+  }
+
+  function setCrt(arg) {
+    const root = document.documentElement;
+    const next = arg ? arg.toLowerCase() : (root.dataset.crt === 'off' ? 'on' : 'off');
+    if (next !== 'on' && next !== 'off') { print('usage: crt [on|off]', 'err'); return; }
+    if (next === 'off') root.dataset.crt = 'off'; else delete root.dataset.crt;
+    store('xcpu-term-crt', next);
+    print('> crt ' + next, 'ok');
+  }
+
+  function startPing() {
+    print('> channel open to info@x-cpu.com. Replies can take a few days.', 'ok gap');
+    print('Type your message and press enter. Your mail app opens to send it. Type cancel to back out.', 'dim');
+    print('Never send passwords, provider logins or playlist links.', 'dim');
+    setLabel('message>');
+    pending = (text) => {
+      pending = null;
+      setLabel(PROMPT);
+      if (!text.trim() || text.trim().toLowerCase() === 'cancel') { print('> channel closed.', 'dim'); return; }
+      const href = 'mailto:info@x-cpu.com?subject=' + encodeURIComponent('Hello from the x-cpu terminal') + '&body=' + encodeURIComponent(text);
+      const link = el('a', 'cmd', 'open in mail app');
+      link.href = href;
+      link.style.color = 'var(--link)';
+      printParts([el('span', 'ok', '> transmission ready: '), link]);
+      location.href = href;
+    };
+  }
+
+  function showSupport() {
+    print('Support', 'accent gap');
+    rows(PROJECTS.map((p) => [cmdButton('run ' + p.id, p.id), 'setup guide and FAQ on the project page']));
+    const guide = cmdButton('support-page', 'full support page');
+    printParts([el('span', 'dim', 'also: '), guide, el('span', 'dim', '  or '), cmdButton('ping')]);
+  }
+
+  function showPrivacy() {
+    print('Commands run in your browser and are not sent anywhere.', 'gap');
+    print('Plain-English questions go to an AI model hosted by Cloudflare. We do not store the text. Please leave out personal details.');
+    print('Your theme and CRT choice stay in this browser.', 'dim');
+  }
+
+  async function fakeDelete() {
+    setBusy(true);
+    const line = print('Deleting everything ........ 0%', 'err');
+    for (const n of [12, 37, 64, 91]) {
+      await wait(280);
+      line.textContent = 'Deleting everything ........ ' + n + '%';
+    }
+    await wait(350);
+    print('kidding. Nothing here is yours to delete.', 'ok');
+    setBusy(false);
+  }
+
+  const COMMANDS = {
+    help: { max: 0, run: showHelp },
+    projects: { max: 0, run: showProjects },
+    ls: { max: 1, run: showProjects, hidden: true },
+    about: { max: 0, run: showAbout },
+    ping: { max: 0, run: startPing },
+    contact: { max: 0, run: startPing, hidden: true },
+    support: { max: 0, run: showSupport },
+    'support-page': { max: 0, hidden: true, run: () => openWindow({ id: 'support', url: '/support/' }) },
+    theme: { max: 1, run: ([t]) => (t ? setTheme(t) : showThemes()) },
+    themes: { max: 0, run: showThemes, hidden: true },
+    crt: { max: 1, run: ([a]) => setCrt(a) },
+    privacy: { max: 0, run: showPrivacy },
+    clear: { max: 0, run: () => { log.textContent = ''; setChips(DEFAULT_CHIPS); } },
+    cls: { max: 0, run: () => { log.textContent = ''; setChips(DEFAULT_CHIPS); }, hidden: true },
+    history: { max: 0, run: () => typed.forEach((c, i) => print(String(i + 1).padStart(4) + '  ' + c, 'dim')) },
+    exit: { max: 0, run: () => { location.href = '/'; } },
+    quit: { max: 0, run: () => { location.href = '/'; }, hidden: true },
+    home: { max: 0, run: () => { location.href = '/'; }, hidden: true },
+    run: { max: 1, run: runProject },
+    open: { max: 1, run: runProject, hidden: true },
+    cd: { max: 1, run: runProject, hidden: true },
+    whoami: { max: 0, hidden: true, run: () => print('guest. Provisional human. Upgrade pending.') },
+    date: { max: 0, hidden: true, run: () => print(new Date().toString()) },
+    uptime: { max: 0, hidden: true, run: () => print('up ' + Math.round((Date.now() - started) / 1000) + ' seconds. Growing up: still optional.') },
+    hi: { max: 0, hidden: true, run: greet },
+    hello: { max: 0, hidden: true, run: greet },
+    hey: { max: 0, hidden: true, run: greet },
+    vim: { max: 1, hidden: true, run: () => print('You have entered vim. There is no way out. (Kidding. Type help.)') },
+    sudo: { max: 9, hidden: true, run: (args) => {
+      if (args.join(' ').toLowerCase() === 'grow-up') {
+        print('sudo: grow-up: permission denied', 'err');
+        print('This incident will be reported to your inner child.', 'dim');
+      } else {
+        print('guest is not in the sudoers file. This incident will be reported to your inner child.', 'err');
+      }
+    } },
+    rm: { max: 9, hidden: true, run: fakeDelete },
+  };
+
+  function greet() { print('Hello, human. Systems nominal. Type help or ask me something.'); }
+
+  function runProject([name]) {
+    if (!name) { print('usage: run <name>', 'err'); showProjects(); return; }
+    const project = findProject(name);
+    if (!project) { print('run: no such project: ' + name, 'err'); showProjects(); return; }
+    print('> mounting ' + project.url + ' ...', 'ok');
+    openWindow(project);
+  }
+
+  function distance(a, b) {
+    const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      }
+    }
+    return dp[a.length][b.length];
+  }
+
+  function closestCommand(word) {
+    if (word.length < 3) return null;
+    const limit = word.length > 4 ? 2 : 1;
+    let best = null, bestScore = limit + 1;
+    Object.keys(COMMANDS).filter((c) => !COMMANDS[c].hidden).forEach((c) => {
+      const d = distance(word, c);
+      if (d < bestScore) { best = c; bestScore = d; }
+    });
+    return best;
+  }
+
+  function typeOut(text) {
+    return new Promise((resolve) => {
+      const line = el('div', 'line');
+      const visible = el('span');
+      visible.setAttribute('aria-hidden', 'true');
+      line.append(visible, el('span', 'sr', text));
+      add(line);
+      let i = 0;
+      const timer = setInterval(() => {
+        i = Math.min(text.length, i + 3);
+        visible.textContent = text.slice(0, i);
+        scroll();
+        if (i >= text.length) { clearInterval(timer); resolve(); }
+      }, 16);
+    });
+  }
+
+  const AI_ERRORS = {
+    slow_down: 'Easy, human. Too many questions at once. Give it a minute.',
+    visitor_limit: "You've reached today's question limit. Scripted commands still work.",
+    quota: 'AI core offline: daily quota spent. Scripted commands still work.',
+  };
+
+  async function ask(question) {
+    if (!aiUrl) {
+      print('AI core not connected yet. Scripted commands still work.', 'err');
+      printParts([el('span', 'dim', '> try: '), cmdButton('help')]);
+      return;
+    }
+    setBusy(true);
+    if (!aiNoticeShown) {
+      aiNoticeShown = true;
+      print('Questions are answered by an AI hosted by Cloudflare. Leave out personal details.', 'dim');
+    }
+    const status = print('> querying core ...', 'dim');
+    let failure = null, answer = '';
+    try {
+      const res = await fetch(aiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: question, history: chat.slice(-6) }),
+        signal: AbortSignal.timeout(16000),
+      });
+      const data = await res.json();
+      if (res.ok && data.reply) answer = data.reply;
+      else failure = AI_ERRORS[data.error] || 'AI core fault. Scripted commands still work.';
+    } catch (e) {
+      failure = 'AI core unreachable. Scripted commands still work.';
+    }
+    status.remove();
+
+    if (failure) {
+      print(failure, 'err');
+      printParts([el('span', 'dim', '> try: '), cmdButton('help')]);
+      setBusy(false);
+      return;
+    }
+
+    const cut = answer.search(/\bNEXT:/i);
+    const next = cut < 0 ? null : answer.slice(cut + 5).replace(/[`"'.]/g, '').trim().toLowerCase();
+    const body = (cut < 0 ? answer : answer.slice(0, cut)).trim();
+    chat.push({ role: 'user', content: question }, { role: 'assistant', content: body });
+    await typeOut(body);
+    if (next && SAFE_NEXT.test(next)) {
+      printParts([el('span', 'dim', '> try: '), cmdButton(next)]);
+      setChips([next].concat(DEFAULT_CHIPS.filter((c) => c !== next)));
+    }
+    setBusy(false);
+  }
+
+  async function exec(raw) {
+    if (busy) return;
+    const text = raw.trim();
+    closeWindow();
+
+    if (pending) {
+      print(label.textContent + ' ' + text, 'dim gap');
+      pending(text);
+      scroll();
+      return;
+    }
+
+    const echo = el('div', 'line gap');
+    echo.append(el('span', 'ok', PROMPT + ' '), el('span', '', text));
+    add(echo);
+    if (!text) return;
+    typed.push(text);
+    historyIndex = typed.length;
+
+    const parts = text.split(/\s+/);
+    const name = parts[0].toLowerCase();
+    const args = parts.slice(1);
+    const command = Object.prototype.hasOwnProperty.call(COMMANDS, name) ? COMMANDS[name] : null;
+
+    if (command && args.length <= command.max) {
+      command.run(args);
+      scroll();
+      return;
+    }
+
+    if (parts.length === 1) {
+      const guess = closestCommand(name);
+      if (guess) {
+        printParts([el('span', 'err', 'command not found: ' + name + '. '), el('span', 'dim', 'did you mean '), cmdButton(guess), el('span', 'dim', '?')]);
+        return;
+      }
+      if (!aiUrl) {
+        printParts([el('span', 'err', 'command not found: ' + name + '. '), el('span', 'dim', 'try '), cmdButton('help')]);
+        return;
+      }
+    }
+    await ask(text);
+  }
+
+  function complete() {
+    const value = input.value;
+    const m = value.match(/^(run|open|theme)\s+(\S*)$/i);
+    let options, prefix, lead;
+    if (m) {
+      lead = m[1].toLowerCase() + ' ';
+      prefix = m[2].toLowerCase();
+      options = lead.trim() === 'theme' ? Object.keys(THEMES) : PROJECTS.map((p) => p.id);
+    } else if (/^\S+$/.test(value)) {
+      lead = '';
+      prefix = value.toLowerCase();
+      options = Object.keys(COMMANDS).filter((c) => !COMMANDS[c].hidden);
+    } else return;
+    const hit = options.filter((o) => o.startsWith(prefix));
+    if (hit.length === 1) input.value = lead + hit[0] + (lead ? '' : ' ');
+    else if (hit.length > 1) print(hit.join('   '), 'dim');
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const value = input.value;
+    input.value = '';
+    exec(value);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (historyIndex > 0) { historyIndex--; input.value = typed[historyIndex]; }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex < typed.length) { historyIndex++; input.value = typed[historyIndex] || ''; }
+    } else if (e.key === 'Tab' && input.value) {
+      e.preventDefault();
+      complete();
+    } else if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+      e.preventDefault();
+      log.textContent = '';
+    } else if (e.ctrlKey && e.key.toLowerCase() === 'c' && !input.selectionEnd) {
+      if (pending) { pending(''); }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeWindow();
+  });
+
+  screen_.addEventListener('click', () => {
+    if (String(getSelection())) return;
+    focusInput();
+  });
+
+  const LOGO = [
+    '██╗  ██╗       ██████╗██████╗ ██╗   ██╗',
+    '╚██╗██╔╝      ██╔════╝██╔══██╗██║   ██║',
+    ' ╚███╔╝ █████╗██║     ██║  ██║██║   ██║',
+    ' ██╔██╗ ╚════╝██║     ██║  ██║██║   ██║',
+    '██╔╝ ██╗      ╚██████╗██████╔╝╚██████╔╝',
+    '╚═╝  ╚═╝       ╚═════╝██╔═══╝  ╚═════╝ ',
+    '                      ██║              ',
+    '                      ╚═╝              ',
+  ].join('\n');
+
+  function banner() {
+    const logo = el('div', 'logo', LOGO);
+    logo.setAttribute('aria-hidden', 'true');
+    add(logo);
+    print('Where circuits dream and humans compute.', 'accent');
+    print('Type a command or just ask a question.', 'dim');
+  }
+
+  async function boot() {
+    const deep = DEEP_LINKS.includes(params.get('cmd')) ? params.get('cmd') : null;
+    let seen = false;
+    try { seen = sessionStorage.getItem('xcpu-term-boot') === '1'; sessionStorage.setItem('xcpu-term-boot', '1'); } catch (e) {}
+
+    if (!deep && !seen) {
+      let skip = false;
+      const stop = () => { skip = true; };
+      addEventListener('keydown', stop, { once: true });
+      addEventListener('pointerdown', stop, { once: true });
+      const lines = [
+        'x-cpu bios v2.6 ........ ok',
+        'loading curiosity ...... ok',
+        'loading precision ...... ok',
+        'growing up ............. skipped (optional)',
+      ];
+      for (const text of lines) {
+        print(text, text.includes('skipped') ? 'hot' : 'dim');
+        if (!skip) await wait(300);
+      }
+      if (!skip) await wait(220);
+      removeEventListener('keydown', stop);
+      removeEventListener('pointerdown', stop);
+    }
+
+    banner();
+    setChips(DEFAULT_CHIPS);
+    setBusy(false);
+    if (deep) {
+      history.replaceState(null, '', location.pathname);
+      exec(deep);
+    }
+  }
+
+  applyTheme(currentTheme());
+  boot();
+})();
+</script>
+</body>
+</html>
